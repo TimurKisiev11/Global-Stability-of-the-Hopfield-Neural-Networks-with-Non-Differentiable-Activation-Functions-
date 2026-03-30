@@ -1,5 +1,5 @@
 \documentclass[journal]{IEEEtran}
-% *** 28.03.2026 (merged)***
+% *** 30.03.2026 (samll fixes)***
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{mathtools}
 \usepackage{graphicx}
@@ -13,7 +13,7 @@
 % \usepackage{biblatex}
 \usepackage[backend=bibtex,style=numeric]{biblatex}
 
-% *** THEOREM-LIKE ENVIRONMENTS *****
+% *** THEOREM-LIKE ENVIRONMENTS ***
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{proposition}{Proposition}
@@ -55,15 +55,15 @@
 
 \begin{abstract}
 We study global stability of continuous-time Hopfield neural networks with 
-\emph{non-differentiable, possibly non-monotone and unbounded} activations. 
+\emph{discontinuous, possibly non-monotone and unbounded} activations. 
 Modeling the dynamics as a \emph{Filippov differential inclusion}, 
 we derive three verifiable conditions (C1--C3) --- linear growth, componentwise one-sided Lipschitz, 
 and \emph{diagonal Lyapunov stability} --- under which the network admits a \emph{unique equilibrium} 
 that is \emph{globally asymptotically stable}. 
 The proof leverages the Yakubovich--Leonov--Gelig (YLG) quadratic-plus-integral functional, 
 avoiding smoothness assumptions and extending classical bounded/monotone results. 
-We further embed MAX-CUT, TSP, N-Queens, and soft-margin SVM into this discontinuous-activation Hopfield template 
-and verify that each satisfies C1--C3, with simulations confirming convergence from arbitrary initial conditions. 
+We further embed QUBO (including planted MAX-CUT), soft-margin SVM, and constrained optimal control tasks 
+into this discontinuous-activation Hopfield template and verify that each satisfies our conditions, with simulations confirming convergence from arbitrary initial conditions. 
 These results broaden the class of optimization problems solvable by Hopfield networks with rigorous global guarantees.
 \end{abstract}
 
@@ -125,17 +125,17 @@ Our main contributions are as follows.
       Under an additional mild slope condition we further obtain \emph{finite-time entrance} into any prescribed
       shrinking neighborhood of the equilibrium (full details in the Appendix).
 \item \textbf{Optimization embeddings.} We demonstrate that standard penalty embeddings of
-      MAX-CUT, TSP, $N$-Queens, and soft-margin SVM satisfy \textbf{C1--C3}, and we provide numerical
-      integrations consistent with the theory.
+      MAX-CUT, TSP,soft-margin SVM and constrained optimal control tasks satisfy \textbf{C1--C3}.
 \end{enumerate}
 
 \subsection{Organization}\label{sec:intro:org}
 Section~\ref{sec:related} reviews related work.
 Section~\ref{sec:prelim} recalls biological and mathematical models of HNNs,
 Filippov solutions and the YLG framework.
-Section~\ref{sec:problem} states the HNN model in the Lur\'{e} form and assumptions~C1--C3.
-Section~\ref{sec:main} presents the main results on uniqueness and GAS and discusses tightness.
-Section~\ref{sec:examples} contains some numerical illustrations, followed by Sections~\ref{sec:QUBO} and \ref{sec:penalty-HNN} that verify C1--C3 for four optimization embeddings,
+Section~\ref{sec:problem} states the HNN model in the Lur\'{e} form and assumptions~C1--C3. Section~\ref{sec:nonunique} presents a low-dimensional example showing that 
+conditions \textbf{C1--C3} ensure global asymptotic stability of the unique equilibrium 
+but do not guarantee forward uniqueness of Filippov trajectories. Section~\ref{sec:main} presents the main results on uniqueness and GAS and discusses tightness.
+Section~\ref{sec:examples} contains some numerical illustrations, followed by Sections~\ref{sec:qubo-hnn}, \ref{sec:penalty-HNN} and \ref{sec:application_control} verify C1--C3 for four optimization embeddings.
 Conclusions are drawn in Section~\ref{sec:concl}.
 % An informative appendix (not used by the proofs) summarizes biological/circuit intuition and the Kirchhoff model; 
 Full proofs and algorithmic checks appear in technical appendices.
@@ -810,12 +810,12 @@ $\eta\in\mathrm{conv}\,g(x)$, $\zeta\in\mathrm{conv}\,g(y)$ one has
 \end{assumption}
 
 \begin{remark}
-Condition~\textbf{C2} is also known as a \emph{unilateral
+Assumption~\textbf{C2} is also known as a \emph{unilateral
 Lipschitz-like} condition and, together with the linear growth
-Assumption~\textbf{C1}, it is used in a similar way in several works
+condition~\textbf{C1}, it is used in a similar way in several works
 on Hopfield-type networks with discontinuous activations,
-see e.g.\ \cite{unilateral_Lipschitz_like_condition,eq_ref_11,
-GAS_of_delayed,GAS_discrete_time_varying,periodic_time_varying}.
+see e.g.\ \cite{periodic_time_varying,eq_ref_11,unilateral_Lipschitz_like_condition,
+GAS_of_delayed,GAS_discrete_time_varying}.
 \end{remark}
 
 \subsection*{Lur\'e representation and transfer matrix}
