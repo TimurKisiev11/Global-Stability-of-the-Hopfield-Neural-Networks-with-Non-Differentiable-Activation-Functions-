@@ -1,5 +1,5 @@
 \documentclass[journal]{IEEEtran}
-% *** 04.04.2026 (C3 <-> C3')***
+% *** 05.04.2026 (C3 <-> C3') and remove repeating Lure's form equations***
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{mathtools}
 \usepackage{graphicx}
@@ -58,7 +58,7 @@ We study global stability of continuous-time Hopfield neural networks with
 \emph{discontinuous, possibly non-monotone and unbounded} activations. 
 Modeling the dynamics as a \emph{Filippov differential inclusion}, 
 we derive three verifiable conditions (C1--C3) --- linear growth, componentwise one-sided Lipschitz, 
-and \emph{diagonal Lyapunov stability} --- under which the network admits a \emph{unique equilibrium} 
+and \emph{YLG-type frequency condition} --- under which the network admits a \emph{unique equilibrium} 
 that is \emph{globally asymptotically stable}. 
 The proof leverages the Yakubovich--Leonov--Gelig (YLG) quadratic-plus-integral functional, 
 avoiding smoothness assumptions and extending classical bounded/monotone results. 
@@ -119,7 +119,7 @@ Our main contributions are as follows.
       having finitely many first-order jumps and interpret the dynamics as a \emph{Filippov differential inclusion}.
 \item \textbf{Three verifiable hypotheses.} 
       We introduce \textbf{C1--C3} --- linear growth, componentwise one-sided
-      Lipschitz, and a \emph{diagonal Lyapunov stability} test for the linear part --- and show via a YLG
+      Lipschitz, and a \emph{YLG-type frequency condition} --- and show via a YLG
       quadratic\,+\,integral functional that \emph{existence, uniqueness, and GAS} of the equilibrium hold.
 \item \textbf{Finite-time entrance (optional strengthening).}
       Under an additional mild slope condition we further obtain \emph{finite-time entrance} into any prescribed
@@ -629,11 +629,11 @@ see Theorem~\ref{thm:makarov} in Appendix~\ref{app:YLG} for details.
 
 \todo[inline]{New below}
 In the classical setting with continuous activations $g_i$, the
-Hopfield network \eqref{eq:special} is an ordinary differential
-equation
-\[
-   \dot x = -Bx + T g(x) + I, \qquad x\in\mathbb{R}^n,
-\]
+Hopfield network is an ordinary differential
+equation \eqref{eq:special}, 
+% \[
+%    \dot x = -Bx + T g(x) + I, \qquad x\in\mathbb{R}^n,
+% \]
 and the Cauchy problem is well posed. For each $x_0\in\mathbb{R}^n$
 there exists a unique trajectory $t\mapsto x(t;x_0)$, and the maps
 $S_t:x_0\mapsto x(t;x_0)$, $t\ge0$, form a (single–valued) semiflow on
@@ -648,6 +648,7 @@ regularization of the right–hand side by
    = Bx + T\,\overline{\operatorname{conv}}[g(x)] + I,
    \qquad x\in\mathbb{R}^n.
 \end{equation}
+
 Filippov solutions are absolutely continuous functions $x(\cdot)$
 satisfying $\dot x(t)\in F(x(t))$ almost everywhere
 (Definition~\ref{fillipovsol}). In general, such solutions are not
@@ -666,8 +667,7 @@ at time $t$~by
 \end{multline}
 Under the basic hypotheses of Filippov theory (upper semicontinuity of
 $F$, nonempty compact convex values, and linear growth), which are
-satisfied for~\eqref{eq:F-filippov} in view of
-Assumptions~C1–C2, every initial condition admits at least one global
+satisfied for~\eqref{eq:special_conv} in view of Assumptions~C1–C2, every initial condition admits at least one global
 solution on $[0,+\infty)$ and the family
 $\{\Phi_t\}_{t\ge0}$ enjoys the properties
 \begin{itemize}
@@ -946,16 +946,15 @@ Theorem~\ref{thm:YLG-adapted-faithful}.
 % ================================================================
 \section{Problem Statement and Assumptions}\label{sec:problem}
 
-Consider the Hopfield neural network (HNN) in Lur\'e form
-\begin{equation}\label{eq:HNN-lure}
-  \dot{x}(t) = -Bx(t) + T\,g(x(t)) + I, 
-  \qquad x(t)\in\mathbb{R}^n,
-\end{equation}
-where $B=\mathrm{diag}(b_1,\dots,b_n)\succ 0$ collects effective leak
-rates, $T\in\mathbb{R}^{n\times n}$ is the interconnection (synaptic)
-matrix, $I\in\mathbb{R}^n$ is the (rescaled) input vector, and
-$g(x)=(g_1(x_1),\ldots,g_n(x_n))^\top$ is the componentwise activation
+Consider the Hopfield neural network (HNN) in the form \eqref{eq:special}, where $g(x)=(g_1(x_1),\ldots,g_n(x_n))^\top$ is the componentwise activation
 mapping, each $g_i:\mathbb{R}\to\mathbb{R}$ possibly discontinuous.
+% \begin{equation}\label{eq:HNN-lure}
+%   \dot{x}(t) = -Bx(t) + T\,g(x(t)) + I, 
+%   \qquad x(t)\in\mathbb{R}^n,
+% \end{equation}
+% where $B=\mathrm{diag}(b_1,\dots,b_n)\succ 0$ collects effective leak
+% rates, $T\in\mathbb{R}^{n\times n}$ is the interconnection (synaptic)
+% matrix, $I\in\mathbb{R}^n$ is the (rescaled) input vector, and
 
 Throughout the paper we assume that $g$ belongs to the extended class
 $\mathcal G'$ of activation functions (Definition~1), so that every
@@ -997,7 +996,7 @@ GAS_of_delayed,GAS_discrete_time_varying}.
 \subsection*{Lur\'e representation and transfer matrix}
 
 For the purposes of applying the YLG theory we write
-\eqref{eq:HNN-lure} in the standard Lur\'e form
+\eqref{eq:special} in the standard Lur\'e form \eqref{eq:ylg-general-system}
 \begin{equation}\label{eq:lure-Pqr}
   \dot x = P x + q\,\xi, 
   \qquad \sigma = r^{\top}x, 
@@ -1048,11 +1047,12 @@ such that
    \qquad \forall\,\omega\in\mathbb{R},
 \end{equation}
 and
-\begin{equation}\label{eq:C3prime-det}
-  \det\bigl(\mathcal{T} + \lambda \Theta\bigr) \neq 0
+=
+\begin{multline}\label{eq:C3prime-det}
+    \det\bigl(\mathcal{T} + \lambda \Theta\bigr) \neq 0 \\ 
   \quad\text{whenever}\quad 
   \det(P-\lambda I)=\det(-B-\lambda I)=0.
-\end{equation}
+\end{multline}
 \end{assumption}
 
 Assumption~\textbf{C3} is exactly the frequency-domain hypothesis
@@ -1075,8 +1075,8 @@ Assumption~\textbf{C3$'$} will be used only as a derived, purely
 state–space condition.  It can be taken as an alternative to
 \textbf{C3} if one prefers to avoid frequency-domain inequalities (see Section \ref{sec:nonunique} and Appendix \ref{app:proofs}).
 For our main results, however, we assume \textbf{C1}, \textbf{C2},
-\textbf{C3$'$} and $g\in\mathcal G'$; the next lemma shows that
-\textbf{C3} then follows automatically.
+\textbf{C3} and $g\in\mathcal G'$; the next lemma shows that
+\textbf{C3$'$} then follows automatically.
 
 \begin{lemma}[C3 implies C3$'$]\label{lem:C3prime-implies-C3}
 Suppose that Assumption~\textbf{C3} holds. Then there exist a
@@ -1202,7 +1202,7 @@ singleton. Once this is done, global asymptotic stability follows from
 Corollary~\ref{cor:YLG-singleton}.
 
 \begin{theorem}[Global asymptotic stability of a Hopfield network with discontinuous activations]\label{thm:main}
-Consider the continuous–time Hopfield neural network
+Consider the continuous–time Hopfield neural network as in \eqref{eq:special}
 \begin{equation}
   \dot x(t) = -B x(t) + T\,g(x(t)) + I, \qquad x(t)\in\mathbb{R}^n,
   \label{eq:HNN-main}
@@ -1222,11 +1222,12 @@ activation functions (Definition~1) and that Assumptions
 \textbf{C1}–\textbf{C3} hold.
 
 Interpret system~\eqref{eq:HNN-main} in the sense of Filippov, i.e.\
-as the differential inclusion
-\[
+as the differential inclusion \eqref{eq:special_conv}
+\begin{equation}\label{eq:HNN-incl}
    \dot x(t) \in -B x(t) + T\,\varphi(x(t)) + I,
    \qquad \varphi(x)=\mathrm{conv}\,g(x).
-\]
+\end{equation}
+
 Then the following properties hold.
 \begin{enumerate}
   \item For every initial condition $x(0)=x_0\in\mathbb{R}^n$ there
@@ -1271,16 +1272,8 @@ In this subsection we show that under Assumption~\textbf{C1} every
 Filippov solution of the Hopfield network exists on the entire
 half–line $[0,+\infty)$.
 
-Interpreting \eqref{eq:HNN-lure} in the sense of Filippov, we obtain
-the differential inclusion
-\begin{equation}
-    \dot x(t) \in -B x(t) + T\,\varphi(x(t)) + I,
-    \qquad x(t)\in\mathbb{R}^n,
-    \label{eq:HNN-incl}
-\end{equation}
-where $\varphi(x) = \mathrm{conv}\,g(x)$ denotes the Filippov
-convexification of the (possibly discontinuous) activation
-mapping~$g:\mathbb{R}^n\to\mathbb{R}^n$.
+Interpreting \eqref{eq:special} in the sense of Filippov, we obtain
+the differential inclusion \eqref{eq:HNN-incl}.
 
 \begin{proposition}[Global existence]
 \label{prop:global-existence}
@@ -1462,6 +1455,7 @@ T \eta^* &= -(Be+I)
 i.e., by Makarov’s theorem \cite[p. 38, Th. 1.7]{Leonov}, for any solution $x(t)$, 
 there exists an a.e. measurable bounded mapping $\eta(t) \in \overline{\operatorname{conv}}g(x(t))$ such that the equality in the inclusion holds.}
 \end{remark}
+
 Thus, $e$ is an equilibrium point of the neural network \eqref{eq:special} (since there is $\eta^*$ corresponding to it). 
 Next we perform a change of variables $z=x-e$ to shift the equilibrium point to the origin and transform system \eqref{eq:special_conv} from definition \ref{fillipovsol} into system:
 \[
@@ -1484,10 +1478,10 @@ where $G(z)=g(z+e)-\eta^*$. Note that all the properties of $g$ also hold for $G
     it follows that $0 \in \overline{\operatorname{conv}}(G(0))$. Thus, by Definition \ref{equilib}, the origin is an equilibrium point of system \eqref{sys:origin};
     \item $ \frac{ \widetilde{\eta_i}}{z} \leqslant C_i $, $\forall x \ne 0, \quad \forall \widetilde{\eta_i} \in  \overline{\operatorname{conv}}[G_i(z)]$ (a consequence of condition \textbf{C2}).
 \end{enumerate}
-From now on we will write the system \eqref{eq:special_conv} of differential inclusions in the form of \eqref{sys:origin} but using symbols from \eqref{eq:special} and keeping in mind that it is indeed a system with origin as an equilibrium point:
-\begin{equation}\label{eq:special_origin}
-\dot x(t) = Bx+Tg(x),
-\end{equation}
+% From now on we will write the system \eqref{eq:HNN-incl} of differential inclusions in the form of \eqref{sys:origin} but using symbols from \eqref{eq:HNN-main} and keeping in mind that it is indeed a system with origin as an equilibrium point:
+% \begin{equation}\label{eq:special_origin}
+% \dot x(t) = Bx+Tg(x),
+% \end{equation}
 
 \subsection{HNN as a Differential Inclusion in the Lur'e Form}
 
@@ -1497,7 +1491,7 @@ differential inclusion
 \begin{equation}\label{eq:HNN-shifted}
       \dot x(t)\in P x(t)+q\,\varphi(x(t)), \qquad x(t)\in\mathbb R^n,
 \end{equation}
-with $P=-B$, $q=T$, $r^{\top}=I_n$ and $\varphi=\mathrm{conv}\,g$ as
+with $P=-B$, $q=T$, $r^{\top}=I_n$ and $\varphi=\overline{\mathrm{conv}}\,g$ as
 in~\eqref{eq:lure-Pqr}.  In the notation of YLG this is exactly a
 Lur\'e system of the form (3.1):
 \[
@@ -1517,10 +1511,11 @@ not repeated here.
 We now show how Assumptions~\textbf{C1}, \textbf{C2},
 \textbf{C3} and $g\in\mathcal G'$ guarantee that the Lur\'e system
 \eqref{eq:HNN-shifted} satisfies all hypotheses of Theorem~3.1 in
-Chapter~3 of YLG and therefore has a pointwise globally stable
+Chapter~3 of YLG \ref{thm:YLG-adapted-faithful} and therefore has a pointwise globally stable
 stationary set.  Since we already know that the equilibrium is unique,
 this yields global asymptotic stability of the Hopfield network.
 
+\todo[inline]{DELETE}
 \subsubsection*{Theorem 3.1 of YLG in the present notation}
 
 For convenience, we briefly recall Theorem~3.1 of YLG in the notation
@@ -1560,7 +1555,7 @@ YLG.  The theorem assumes:
 
 Under (i)–(v) the system is quasi-gradient-like; adding (vi) one
 obtains pointwise global stability of~$\Lambda$.
-
+\todo[inline]{DELETE}
 \medskip
 \noindent
 \textbf{Verification of the YLG hypotheses.}
