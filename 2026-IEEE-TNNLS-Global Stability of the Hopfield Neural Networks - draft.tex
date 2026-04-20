@@ -1,10 +1,11 @@
 \documentclass[journal]{IEEEtran}
-% *** 11.04.2026 
+% *** 20.04.2026 
 %remove repeating Lur'e form equations 
-% {*} -> '
+% ^{*} -> '
 %\ast -> '
-%T -> {*}
-% delete theorem 3.1
+% ^\star -> '
+% fix eq ref eq:sign-activation eq:strong-field and others
+
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{mathtools}
 \usepackage{graphicx}
@@ -126,9 +127,6 @@ Our main contributions are as follows.
       We introduce \textbf{C1--C3} --- linear growth, componentwise one-sided
       Lipschitz, and a \emph{YLG-type frequency condition} --- and show via a YLG
       quadratic\,+\,integral functional that \emph{existence, uniqueness, and GAS} of the equilibrium hold.
-\item \textbf{Finite-time entrance (optional strengthening).}
-      Under an additional mild slope condition we further obtain \emph{finite-time entrance} into any prescribed
-      shrinking neighborhood of the equilibrium (full details in the Appendix).
 \item \textbf{Optimization embeddings.} We demonstrate that standard penalty embeddings of
       MAX-CUT, TSP,soft-margin SVM and constrained optimal control tasks satisfy \textbf{C1--C3}.
 \end{enumerate}
@@ -142,11 +140,9 @@ these assumptions ensure global asymptotic stability of the unique equilibrium
 but do not guarantee forward uniqueness of Filippov trajectories. Section~\ref{sec:main} presents the main results on uniqueness and GAS and discusses tightness.
 Section~\ref{sec:examples} contains some numerical illustrations, followed by Sections~\ref{sec:qubo-hnn}, \ref{sec:penalty-HNN} and \ref{sec:application_control} that verify \textbf{C1--C3} for four optimization embeddings.
 Conclusions are drawn in Section~\ref{sec:concl}.
-% An informative appendix (not used by the proofs) summarizes biological/circuit intuition and the Kirchhoff model; 
+
 Full proofs and algorithmic checks appear in technical appendices.
 
-% \section{Related Work}\label{sec:related}
-% Position the paper within discontinuous-activation HNNs, Filippov systems in neural dynamics, and absolute stability (Yakubovich/Popov/Circle). Contrast with diagonal stability and quadratic matrix inequality (QMI/LMI) conditions in NN literature; clarify novelty and tightness.
 
 \section{Related Work}\label{sec:related}
 
@@ -202,7 +198,6 @@ In this way, Hopfield networks are placed in direct correspondence
 with the theory of nonsmooth gradient flows and projected dynamical systems 
 developed under differential-inclusion formulations.
 
-% \todo[inline]{New part below}
 
 The foundation for the network’s architecture is the penalty method~\cite{penalty, 517}, where the constrained problem is transformed into an unconstrained minimization through exterior penalty that fits the Hopfield framework, which involves a gradient system of the energy function. This energy function is composed of the objective function and the constraint functions of a particular optimization problem in such a way to provide correlation between optimal solution equation and stationary condition for the network. Solution computation involves providing initial states (voltages) to the neurons, after which the neural network converges to a stable equilibrium point that corresponds to the minimum of the energy function, which in turn corresponds to the minimum
 of the cost function. Therefore, it is crucial for such systems to have a unique globally asymptotically stable equilibrium state.
@@ -319,47 +314,6 @@ The function $g_i$ is piecewise continuous, that is, it is continuous at all poi
     It is important to note that, 
     unlike~\cite{p1}, the functions $g_i$ here are not required to be monotonic and bounded.
 \end{remark}
-
-% In such cases, system~\eqref{eq:special} is naturally interpreted 
-% as a differential inclusion in the sense of Filippov~\cite{p2}: 
-% the right–hand side $g$ is replaced by its convexified set–valued map, 
-% and solutions are absolutely continuous curves whose derivatives belong to the Filippov set almost everywhere. 
-% This preserves the circuit interpretation (e.g., sliding along switching manifolds) 
-% and enables nonsmooth Lyapunov/invariance arguments. 
-% Formal definitions are recalled further in the next subsection.
-
-% \todo[inline]{!TODO: correct the statement about DS}
-% \medskip
-% \textbf{The HNN as a dynamical system.}
-% Equation~\eqref{eq:special} defines a continuous–time dynamical system (a semiflow) on $\mathbb{R}^n$:
-% for each initial condition $x(0)=x_0$, there is a trajectory $t\mapsto x(t;x_0)$ governed by the vector field
-% \(
-% f(x)=-Bx+Tg(x)+I.
-% \)
-% Equilibria are the zeros of $f$, i.e., solutions of
-% \(
-% -Bx^\star + T g(x^\star) + I = 0,
-% \)
-% and their stability properties determine the qualitative behavior of the network. In optimization–oriented uses of HNNs, one seeks \emph{monostability} (existence, uniqueness, and global asymptotic stability of $x^\star$); in associative–memory uses, one typically exploits \emph{multistability} (many locally attractive equilibria). Lyapunov (energy) functions, when available, provide constructive certificates of convergence.
-
-%
-% Optional figures (commented to keep the main text compact for review)
-% \begin{figure*}[!t]
-%   \begin{minipage}{0.49\linewidth}
-%     \centering
-%     \includegraphics[width=\linewidth]{neuron_small.png}
-%     \caption{Schematic of biological neurons and synaptic connections.}
-%     \label{fig:neuron}
-%   \end{minipage}\hfill
-%   \begin{minipage}{0.49\linewidth}
-%     \centering
-%     \includegraphics[width=0.75\linewidth]{circuit_mod.png}
-%     \caption{Equivalent Kirchhoff circuit for a Hopfield network node.}
-%     \label{fig:circuit}
-%   \end{minipage}
-% \end{figure*}
-
-% \subsection{Filippov Solutions}
 
 To define the solutions of system~\eqref{eq:special} with 
 a discontinuous right-hand side and $g\in\mathcal{G'}$,
@@ -851,13 +805,6 @@ Theorem~\ref{thm:YLG-adapted-faithful}.
 
 Consider the Hopfield neural network (HNN) in the form \eqref{eq:special}, where $g(x)=(g_1(x_1),\ldots,g_n(x_n))^*$ is the componentwise activation
 mapping, each $g_i:\mathbb{R}\to\mathbb{R}$ possibly discontinuous.
-% \begin{equation}\label{eq:HNN-lure}
-%   \dot{x}(t) = -Bx(t) + T\,g(x(t)) + I, 
-%   \qquad x(t)\in\mathbb{R}^n,
-% \end{equation}
-% where $B=\mathrm{diag}(b_1,\dots,b_n)\succ 0$ collects effective leak
-% rates, $T\in\mathbb{R}^{n\times n}$ is the interconnection (synaptic)
-% matrix, $I\in\mathbb{R}^n$ is the (rescaled) input vector, and
 
 Throughout the paper we assume that $g$ belongs to the extended class
 $\mathcal G'$ of activation functions (Definition~1), so that every
@@ -899,13 +846,7 @@ GAS_of_delayed,GAS_discrete_time_varying}.
 \subsection*{Lur\'e representation and transfer matrix}
 
 For the purposes of applying the YLG theory we write
-\eqref{eq:special} in the standard Lur\'e form \eqref{eq:lure-extended}
-\begin{equation*}
-  \dot x = P x + q\,\xi, 
-  \qquad \sigma = r^{*}x, 
-  \qquad \xi \in \varphi(\sigma),
-\end{equation*}
-with
+\eqref{eq:special} in the standard Lur\'e form \eqref{eq:lure-extended} with
 \begin{equation}\label{eq:Pqr-def}
   P := -B,\qquad
   q := T,\qquad
@@ -1118,7 +1059,7 @@ Interpret system~\eqref{eq:special} in the sense of Filippov, i.e.\
 as the differential inclusion \eqref{eq:special_conv}
 \begin{equation*}
    \dot x(t) \in -B x(t) + T\,\varphi(x(t)) + I,
-   \qquad \varphi(x)=\mathrm{conv}\,g(x).
+   \qquad \varphi(x) = \overline{\mathrm{conv}}\,g(x).
 \end{equation*}
 
 Then the following properties hold.
@@ -1269,30 +1210,7 @@ at least one Filippov solution $x(\cdot;x_0)$ of~\eqref{eq:special_conv}
 defined on the entire half–line $[0,+\infty)$.
 \end{proof}
 
-% \subsection{Existence and Uniqueness of Equilibrium}
-
-% In this subsection we continue to work under Assumptions~\textbf{C1},
-% \textbf{C2}, \textbf{C3$'$} and $g\in\mathcal G'$.  By
-% Lemma~\ref{lem:C3prime-implies-C3}, the diagonal Lyapunov condition
-% \textbf{C3} also holds, and the argument in the current version of the
-% draft showing existence and uniqueness of an equilibrium can be used
-% verbatim.  In particular, denoting by $e\in\mathbb{R}^n$ the unique
-% equilibrium one has
-% \[
-%   0 \in -Be + T\,\mathrm{conv}\,g(e) + I .
-% \]
-% We keep the detailed calculations and estimates in this subsection
-% unchanged, only replacing references to ``Assumption~C3'' by
-% ``Assumption~C3, which follows from~C3$'$ by
-% Lemma~\ref{lem:C3prime-implies-C3}.''
-
 \subsection{Existence and Uniqueness of Equilibrium}
-% \begin{theorem}[Uniqueness]\label{thm:uniq}
-% Under \textnormal{C1--C3}, the HNN admits a unique equilibrium $x^\star$.
-% \end{theorem}
-% \begin{IEEEproof}[Proof sketch]
-% Provide the strong monotonicity or contraction argument in Filippov sense implied by C2 together with diagonal Lyapunov properties from C3. Full details are deferred to Appendix~\ref{app:proofs}.
-% \end{IEEEproof}
 Suppose $x^{(1)}\neq x^{(2)}$ are two equilibria; pick selections
 $\xi^{(k)}\in\varphi\bigl(x^{(k)}\bigr)$ and denote
 $\Delta x=x^{(1)}-x^{(2)}$, $\Delta\xi=\xi^{(1)}-\xi^{(2)}$.  
@@ -1321,15 +1239,6 @@ we get
 contradicting the inequality embedded in \textbf{C3$'$} (and, thus, \textbf{C3}). 
 Therefore $\Delta x~=~0$ and
 uniqueness holds.
-% From $B\Delta x+T\Delta\xi=0$
-% left–multiplying by $\Delta x^{\!*}\alpha$ yields
-% \[
-%  -\sum_{i}\alpha_i b_i|\Delta x_i|^{2}+\Delta x^{\!*}\alpha T\Delta\xi=0.
-% \]
-% Using C1 and the small–gain clause of C3 the second term is bounded in
-% absolute value by $\tfrac{b_{\min}}{2}\Vert\Delta x\Vert^{2}$, whereas the
-% first term is $\leqslant -b_{\min}\Vert\Delta x\Vert^{2}$.  The sum cannot vanish
-% unless $\Delta x=0$, contradiction.  Hence the equilibrium is unique.
 
 Now, similarly to \cite{p1}, we will perform a change of variables to translate $e$ into the origin. Let $e$ be an equilibrium point of the set-valued mapping $\varphi(x(t))$, i.e., by Definition \ref{equilib}:
 \[
@@ -1541,57 +1450,6 @@ stationary set.  Thus (vi) is satisfied as well.
 
 We can now state and prove the main result.
 
-% \begin{theorem}[Global asymptotic stability of a Hopfield network with discontinuous activations]\label{thm:main}
-% Consider the continuous–time Hopfield neural network
-% \begin{equation}
-%   \dot x(t) = -B x(t) + T\,g(x(t)) + I, \qquad x(t)\in\mathbb{R}^n,
-%   \label{eq:special}
-% \end{equation}
-% where
-% \begin{itemize}
-%   \item $B = \mathrm{diag}(b_1,\dots,b_n)\succ 0$ is a diagonal matrix
-%         of leak rates;
-%   \item $T\in\mathbb{R}^{n\times n}$ is the interconnection (synaptic) matrix;
-%   \item $I\in\mathbb{R}^n$ is a constant input vector;
-%   \item $g=(g_1,\dots,g_n)^{*}:\mathbb{R}^n\to\mathbb{R}^n$ is the
-%         componentwise activation mapping, each
-%         $g_i:\mathbb{R}\to\mathbb{R}$ possibly discontinuous.
-% \end{itemize}
-% Assume that $g$ belongs to the extended class $\mathcal{G}'$ of
-% activation functions (Definition~1) and that Assumptions
-% \textbf{C1}–\textbf{C3$'$} hold.
-
-% Interpret system~\eqref{eq:special} in the sense of Filippov, i.e.\
-% as the differential inclusion
-% \[
-%    \dot x(t) \in -B x(t) + T\,\varphi(x(t)) + I,
-%    \qquad \varphi(x)=\mathrm{conv}\,g(x).
-% \]
-% Then the following properties hold.
-% \begin{enumerate}
-%   \item For every initial condition $x(0)=x_0\in\mathbb{R}^n$ there
-%         exists at least one Filippov solution $x(\cdot;x_0)$
-%         of~\eqref{eq:special} defined on the whole half–line
-%         $[0,+\infty)$.
-
-%   \item There exists a unique equilibrium point $e\in\mathbb{R}^n$,
-%         i.e.\ a constant vector satisfying
-%         \[
-%            0 \in -B e + T\,\mathrm{conv}\,g(e) + I .
-%         \]
-
-%   \item This equilibrium is \emph{globally asymptotically stable in
-%         the sense of Filippov}: for every Filippov solution
-%         $x(\cdot;x_0)$ of~\eqref{eq:special} one has
-%         \[
-%            \lim_{t\to+\infty} x(t;x_0) = e ,
-%         \]
-%         and for every $\varepsilon>0$ there exists $\delta>0$ such
-%         that $|x_0-e|<\delta$ implies $|x(t;x_0)-e|<\varepsilon$ for
-%         all $t\ge0$.
-% \end{enumerate}
-% \end{theorem}
-
 \begin{proof}
 Item~1 is exactly Proposition~\ref{prop:global-existence}.  Item~2 is
 established in the subsection on existence and uniqueness of
@@ -1757,7 +1615,6 @@ which satisfies \eqref{eq:scalarinc} almost everywhere. For each such $\mu$ we o
 
 
 Thus, even though the YLG conditions \textbf{C1--C3} guarantee global asymptotic stability of the unique equilibrium (here the origin), they do not ensure forward uniqueness of Filippov trajectories. This example highlights that the regularity required for a well-posed semiflow is stronger than that needed for stability alone.
-\todo[inline]{NEW ABOVE}
 
 \section{Challenges in Numerical Simulation of HNNs with Discontinuous Activations}\label{sec:examples}
 
@@ -1784,16 +1641,6 @@ Since the main conditions are satisfied, the origin $(0,0)$
 is a globally asymptotically stable equilibrium point,
 as can be seen from the phase portrait that we obtained by modeling system $(\ref{example1})$ using Python (see Fig. \ref{fig2:right}).
 
-% \todo[inline]{New below}
-
-% Next example aims to present a system with an activation function $h(x)$ (Fig. \ref{fig3:left}) that does not belong to the class $\mathcal{G'}$ (Definition \ref{G_n}), since condition 1 from the definition, which imposes the relation $h_i(0^+) > h_i(0^-)$ on the left-hand and right-hand limit values of the function, is clearly not satisfied. In the right half-plane for $x$, the function grows exponentially, meaning assumption C2 is also violated.
-
-% \begin{equation*}
-%     h_i(x_i) = \begin{cases} e^{x_i}-1, &x_i>0, \\ 
-%     1-x_i, & 
-%     x_i\leqslant 0, \end{cases} \quad i\in 1:2.
-% \end{equation*}
-
 
 Now let’s take function $s(x)$ (Fig. \ref{fig4:left}) as activation for the system $(\ref{example1})$. Assumptions \textbf{C1} (linear growth) and \textbf{C2} (unilateral Lipschitz-like condition) fail because, as stated in~\cite{unilateral_Lipschitz_like_condition}, this function possesses super linear growth and does not comply with unilateral Lipschitz-like condition. The restriction condition from definition \ref{G_n} is also violated $s_i((-1)^+) = 0.01 < 3 = s_i((-1)^-)$ and therefore this function does not belong to the class $\mathcal{G'}$ (Definition \ref{G_n}). 
 
@@ -1806,7 +1653,7 @@ Now let’s take function $s(x)$ (Fig. \ref{fig4:left}) as activation for the sy
 
 Consequently, such a system fails to satisfy all the assumptions stated in section~\ref{sec:problem} and therefore topological structure of the phase space is drastically changed and this system no longer has a unique globally asymptotically stable equilibrium point., as is evident from the phase portrait (Fig. \ref{fig4:right}).
 
-Lastly, let's present the counterexample to assumption \textbf{C3$'$} (DLS) by taking a skew-symmetric matrix $T$ ($T^{\mathrm{T}} = -T$):
+Lastly, let's present the counterexample to assumption \textbf{C3$'$} (DLS) by taking a skew-symmetric matrix $T$ ($T^{*} = -T$):
 
 \begin{equation}\label{example2}
 \begin{cases}\frac{\mathbf{d}x_1}{\mathbf{d}{t}}=-x_1- s_2(x_2),\\\frac{\mathbf{d}x_2}{\mathbf{d}{t}}=-x_2 + s_1(x_1.\end{cases}
@@ -1814,17 +1661,6 @@ Lastly, let's present the counterexample to assumption \textbf{C3$'$} (DLS) by t
 
 Fig. \ref{fig5:left} shows that even though activation function is viable, assumptions on the coefficients of the system are also very important in establishing global asymptotic stability.
 
-% \begin{figure*}[!ht]
-% \begin{minipage}{0.49\linewidth}
-% \includegraphics[width=1.05\textwidth]{g(x).png}
-%   \caption{Activation function graph $g(x)$ for the network \eqref{eq:special}, example}\label{f_i}
-% \end{minipage}
-% \hfill
-% \begin{minipage}{0.49\linewidth}
-%  \includegraphics[width=1.05\textwidth]{draft_with_another_func.png}
-%   \caption{Phase portrait of the differential equation system from Example 1.}\label{fig2:right}
-% \end{minipage}
-% \end{figure*}
 
 \begin{figure*}[h]
 \begin{minipage}{0.49\linewidth}
@@ -1838,17 +1674,6 @@ Fig. \ref{fig5:left} shows that even though activation function is viable, assum
 \end{minipage}
 \end{figure*}
 
-% \begin{figure*}[h]
-% \begin{minipage}{0.49\linewidth}
-% \includegraphics[width=1.05\textwidth]{Figures/h(x).png}
-%   \caption{Graph for the activation function $h(x)$.}\label{fig3:left}
-% \end{minipage}
-% \hfill
-% \begin{minipage}{0.49\linewidth}
-%  \includegraphics[width=1.05\textwidth]{Figures/h(x) good sys.png}
-%   \caption{Phase portrait of the system $(\ref{example1})$ with $h(x)$ activation.}\label{fig3:right}
-% \end{minipage}
-% \end{figure*}
 
 \begin{figure*}[h]
 \begin{minipage}{0.49\linewidth}
@@ -1874,35 +1699,8 @@ Fig. \ref{fig5:left} shows that even though activation function is viable, assum
 \end{minipage}
 \end{figure*}
 
-% \begin{figure*}[!ht]
-% \begin{minipage}{0.49\linewidth}
-% \includegraphics[width=1.05\textwidth]{Figures/f(x).png}
-%   \caption{Activation function graph $g(x)$ for the network \eqref{eq:special}, example}\label{f_i}
-% \end{minipage}
-% \hfill
-% \begin{minipage}{0.49\linewidth}
-%  \includegraphics[width=1.05\textwidth]{draft.png}
-%   \caption{Phase portrait of the differential equation system from Example 1.}\label{fig2:right}
-% \end{minipage}
-% \end{figure*}
-
-% \begin{figure*}[!ht]
-% \begin{minipage}{0.49\linewidth}
-% \includegraphics[width=1.05\textwidth]{Figures/f(x).png}
-%   \caption{Activation function graph $g(x)$ for the network \eqref{eq:special}, example}\label{f_i}
-% \end{minipage}
-% \hfill
-% \begin{minipage}{0.49\linewidth}
-%  \includegraphics[width=1.05\textwidth]{draft2.png}
-%   \caption{Phase portrait of the differential equation system from Example 1.}\label{fig2:right}
-% \end{minipage}
-% \end{figure*}
-
-% \clearpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Application I: Quadratic Unconstrained Binary Optimization via Discontinuous HNNs}
 \label{sec:qubo-hnn}
-\todo[inline]{New below}
 
 We show that under a \emph{strong field} regime, 
 a discontinuous HNN with sign activations globally recovers the unique QUBO optimizer.
@@ -1914,12 +1712,13 @@ Consider
 \end{equation}
 \begin{definition}[Strong field]\label{def:strong-field}
 \((Q,h)\) satisfies the strong field condition if
-\(
-|h_i|>\sum_{j\neq i}|Q_{ij}|\ \ \forall i.
-\)
+\begin{equation}\label{eq:strong-field}
+  |h_i|>\sum_{j\neq i}|Q_{ij}|\ \ \forall i.
+\end{equation}
+
 \end{definition}
 \begin{lemma}[Unique minimizer]\label{lem:qubo-unique}
-Under the strong field condition, \(s^\star=\mathrm{sign}(h)\) 
+Under the strong field condition, \(s'=\mathrm{sign}(h)\) 
 is the unique global minimizer of \eqref{eq:qubo-energy}. 
 Proof in Appendix~\ref{app:qubo-proofs}.
 \end{lemma}
@@ -1936,7 +1735,7 @@ where \(B=\mathrm{diag}(b_i)\succ0\), \(\beta>0\), and
 \end{equation}
 Then \(T=-\beta Q_{\mathrm{shift}}\) yields \(T+T^*\prec0\), so \textbf{C3} holds (with \(\alpha=I\)); \textbf{C1-C2} hold for the sign activation.
 \begin{theorem}[Global convergence to the planted optimizer]\label{th:hnn-solves-strong-field-qubo}
-Under the strong field condition and \textbf{C1-C3}, \eqref{eq:hnn-qubo} has a unique Filippov equilibrium \(x^\star\), globally asymptotically stable, and \(g(x^\star)=\mathrm{sign}(x^\star)=s^\star\), the unique QUBO optimizer. 
+Under the strong field condition and \textbf{C1-C3}, \eqref{eq:hnn-qubo} has a unique Filippov equilibrium \(x'\), globally asymptotically stable, and \(g(x')=\mathrm{sign}(x')=s'\), the unique QUBO optimizer. 
 Proof in Appendix~\ref{app:qubo-proofs}.
 \end{theorem}
 
@@ -1950,9 +1749,9 @@ If the weights satisfy
 \begin{equation}\label{eq:gamma-condition}
   \gamma>\tfrac12\max\!\big\{(n_A-1)w_{\mathrm{in}}\!+\!n_B w_{\mathrm{out}},\ (n_B-1)w_{\mathrm{in}}\!+\!n_A w_{\mathrm{out}}\big\},
 \end{equation}
-then \((Q^{\mathrm{MC}},h)\) meets Definition~\ref{def:strong-field}. With \(Q_{\mathrm{shift}}=Q^{\mathrm{MC}}+\mu I\succ0\) and the HNN \eqref{eq:hnn-qubo}, Theorem~\ref{th:hnn-solves-strong-field-qubo} implies:
+then \((Q^{\mathrm{MC}},h)\) meets Definition~\ref{eq:strong-field}. With \(Q_{\mathrm{shift}}=Q^{\mathrm{MC}}+\mu I\succ0\) and the HNN \eqref{eq:hnn-qubo}, Theorem~\ref{th:hnn-solves-strong-field-qubo} implies:
 \begin{corollary}\label{cor:hnn-planted-maxcut}
-The HNN output converges globally to \(s^\star\) aligned with the planted partition \((A,B)\), which is the unique minimizer of the MAX-CUT QUBO with field. Proof in Appendix~\ref{app:qubo-proofs}.
+The HNN output converges globally to \(s'\) aligned with the planted partition \((A,B)\), which is the unique minimizer of the MAX-CUT QUBO with field. Proof in Appendix~\ref{app:qubo-proofs}.
 \end{corollary}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1979,7 +1778,7 @@ Represent \(q_c\) with a convex–nonsmooth potential \(\phi\) whose subdifferen
 and run \(\dot x\in -\partial V(x)\). This realizes \(\dot x=-Bx+T g(x)+I\) 
 with finitely many discontinuities in the activation (from \(\max\{0,\cdot\}\)), 
 satisfying our conditions after a standard diagonal shift of the quadratic part (YLG/Lur’e spirit). 
-Then the unique GAS equilibrium \(x^\star\) solves \(P(c)\). 
+Then the unique GAS equilibrium \(x'\) solves \(P(c)\). 
 Construction and checks are in Appendix~\ref{app:penalty-proofs}.
 
 \subsection{Example: Soft–Margin SVM in Hopfield Form}\label{sec:SVM-HNN}
@@ -1995,8 +1794,8 @@ can be written as an exact-penalty objective
 with \(u=(w^*,b)^*\), \(\bar z_i=(z_i^*,1)^*\), and sufficiently large~\(\rho\).
 Let \(x=(u^*,\xi^*)^*\). The piecewise-linear kinks in the hinge term define a componentwise discontinuous activation (single upward jump). Choosing a diagonal leakage and a shifted quadratic synaptic matrix (so \(T+T^*\prec0\)) yields a discontinuous HNN of the Lur’e form satisfying \textbf{C1-C3}. Therefore:
 \begin{proposition}[Unique globally convergent SVM solver]\label{prop:SVM}
-The Hopfield network built from \eqref{eq:SVM-penalty} by \(\dot x\in -\partial V(x)\) has a unique Filippov equilibrium \(x^\star=(u^\star,\xi^\star)\) and \(x(t)\to x^\star\) from any initialization. 
-The classifier parameters \((w^\star,b^\star)\) coincide with the optimal soft-margin SVM solution. 
+The Hopfield network built from \eqref{eq:SVM-penalty} by \(\dot x\in -\partial V(x)\) has a unique Filippov equilibrium \(x'=(u',\xi')\) and \(x(t)\to x'\) from any initialization. 
+The classifier parameters \((w',b')\) coincide with the optimal soft-margin SVM solution. 
 \end{proposition}
 Proof in Appendix~\ref{app:penalty-proofs}.
 
@@ -2100,24 +1899,7 @@ See details in Appendix~\ref{app:control-proofs}.
 \begin{remark}
 The convex normal-cone implements saturation as a discontinuous activation, placing the design squarely in the Filippov/YLG setting used by our main theorem.
 \end{remark}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\todo[inline]{New above}
 
-% \section{Applications and Embeddings}\label{sec:apps}
-% \todo[inline]{Map optimization tasks into the HNN template and verify C1--C3 per case.}
-
-
-% \section{Numerical Illustrations}\label{sec:num}
-% Describe the experimental setup (solver, step size/tolerance, initialization, random seeds). Mention Filippov integration strategy (hysteresis/smoothing or event handling).
-
-% \begin{figure}[!t]
-% \centering
-% \includegraphics[width=\linewidth]{fig1.png}
-% \caption{Illustrative phase portrait / convergence trace for a toy instance consistent with C1--C3.}
-% \label{fig:demo}
-% \end{figure}
-
-% \todo[inline]{Reformat two column table into one column}
 
 \section{Discussion and Conclusion}\label{sec:concl}
 The classical Yakubovich--Leonov--Gelig machinery provides a concise proof
@@ -2485,7 +2267,6 @@ Then the stationary set $\Lambda$ of system~\eqref{eq:YLG-31-system}
 is \emph{pointwise globally stable}.
 \end{theorem}
 
-\todo[inline]{NEW BELOW}
 \subsection{Proof of Proposition 3}\label{prop3_proof}
 \begin{proof}
 Define
@@ -2500,7 +2281,6 @@ x^{(1)}(t)\neq x^{(2)}(t),
 \]
 since $x_{2}^{(1)}(t)=a(1-e^{-t})>0$ and $x_{2}^{(2)}(t)=-a(1-e^{-t})<0$ when $a>0$. Thus the solutions are distinct, and forward uniqueness fails.
 \end{proof}
-\todo[inline]{NEW ABOVE}
 
 
 \section{Global stability results for HNNs using D.W.~Shevitz and B.~Paden's approach.} \label{app:proofs}
@@ -2595,9 +2375,9 @@ The proof of this theorem can be carried out using the fixed-point theorem 3.2.8
     we introduce a dependence on $\lambda \in [0,1]$ into the system, thereby defining new mapping $\varPhi(\lambda,x(t))$:
     \[\varPhi(\lambda,x(t)) = Bx + \lambda T~ \overline{\operatorname{conv}}(g(x))+\lambda I.\]
     As the set $K$ (from the theorem 3.2.8), we choose a closed sphere in $\mathbb{R}^n$:
-    \[K = \{x:~x^\mathrm{T}x \leqslant R^2 \} = \{ x:~\|x\| \leqslant R\}.\]
+    \[K = \{x:~x^{*}x \leqslant R^2 \} = \{ x:~\|x\| \leqslant R\}.\]
 Now we determine the tangent cone\footnotemark[2] to $K$:
-\[T_K(x) = \{y : y^\mathrm{T}x \leqslant 0\}, \quad \forall x \in \partial K.\]
+\[T_K(x) = \{y : y^{*}x \leqslant 0\}, \quad \forall x \in \partial K.\]
 Since $\varPhi(0,x) = Bx$, and $B =\operatorname{diag}(-b_1,...,-b_n)\in M_n(\mathbb{R})$, $b_i>0$, we obtain:
 \[\varPhi(0,x)\cap T_k(x) = \{Bx\} \ne \emptyset, \quad \forall x \in \partial K.\]
 The first condition of theorem 3.2.8 is satisfied; it remains to show that for all $x \in \partial K$ and $\lambda \in [0,1]$, the condition $0 \notin \varPhi(\lambda,x)$ holds.
@@ -2620,41 +2400,41 @@ From condition \textbf{C2} and subsequently lemma \ref{main_lemma} it follows th
     \]
 Rewriting in vector form and applying the statement of the lemma 1:
 \begin{equation}\label{2.3.5}
-x^\mathrm{T} x - d \widetilde{\eta}^{\mathrm{T}}  \alpha  Bx \geqslant \varepsilon x^\mathrm{T} (-B) x . 
+x^{*} x - d \widetilde{\eta}^{*}  \alpha  Bx \geqslant \varepsilon x^{*} (-B) x . 
 \end{equation}
 
 Multiplying equation \eqref{2.3.4} by the same bracket:
 \begin{equation}\label{2.3.6}
 \begin{aligned}&
-\underbrace{(-2B^{-1}x+2d \alpha\widetilde\eta)^\mathrm{T}}_{=\xi} f  =\\&= \underbrace{(-2B^{-1}x+2d \alpha\widetilde\eta)^\mathrm{T}}_{=\xi}(Bx + \lambda T \widetilde{\eta} + \lambda \widetilde I ).    
+\underbrace{(-2B^{-1}x+2d \alpha\widetilde\eta)^{*}}_{=\xi} f  =\\&= \underbrace{(-2B^{-1}x+2d \alpha\widetilde\eta)^{*}}_{=\xi}(Bx + \lambda T \widetilde{\eta} + \lambda \widetilde I ).    
 \end{aligned}
 \end{equation}
 Here, $(-2B^{-1}x+2d\alpha\widetilde{\eta}) = \xi$ can be interpreted as an element of the Clarke generalized gradient \cite{p14} for the neural networks energy function (this term will be further investigated in the proof of the theorem 3). Expanding the brackets, equation \eqref{2.3.6} becomes:
 \begin{equation*}\label{2.3.7} 
-\begin{aligned}\xi f  = & \big[-2 x^{\mathrm{T}} x + 2 d \widetilde{\eta}^\mathrm{T}  \alpha Bx\big] - 2 \lambda x^{\mathrm{T}} B^{-1} T \widetilde{\eta} +\\ & +2 \lambda d  \widetilde{\eta}^\mathrm{T} \alpha T \widetilde{\eta} - 2 \lambda x^\mathrm{T} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^\mathrm{T} \alpha \widetilde I .\end{aligned}   
+\begin{aligned}\xi f  = & \big[-2 x^{*} x + 2 d \widetilde{\eta}^{*}  \alpha Bx\big] - 2 \lambda x^{*} B^{-1} T \widetilde{\eta} +\\ & +2 \lambda d  \widetilde{\eta}^{*} \alpha T \widetilde{\eta} - 2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I .\end{aligned}   
 \end{equation*}
 Using equation \eqref{2.3.5}, we derive the inequality:
 \begin{equation*}\label{2.3.8} 
-\begin{aligned} \xi f  \leqslant & \big[-2 \varepsilon b_m x^\mathrm{T} x \big]- 2 \lambda x^{\mathrm{T}} B^{-1} T \widetilde{\eta} +\\ & +2 \lambda d  \widetilde{\eta}^\mathrm{T} \alpha T \widetilde{\eta} - 2 \lambda x^\mathrm{T} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^\mathrm{T} \alpha \widetilde I.
+\begin{aligned} \xi f  \leqslant & \big[-2 \varepsilon b_m x^{*} x \big]- 2 \lambda x^{*} B^{-1} T \widetilde{\eta} +\\ & +2 \lambda d  \widetilde{\eta}^{*} \alpha T \widetilde{\eta} - 2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I.
 \end{aligned}      
 \end{equation*} 
-Rewriting $-2\varepsilon b_m z^{\mathrm{T}}z$ as the sum of two terms and multiplying the second term by $\lambda$, we obtain the following inequality (since $\lambda \in [0,1]$):  
+Rewriting $-2\varepsilon b_m z^{*}z$ as the sum of two terms and multiplying the second term by $\lambda$, we obtain the following inequality (since $\lambda \in [0,1]$):  
 \begin{equation}\label{2.3.9}
-\begin{aligned}\xi f \leqslant & - \varepsilon b_m x^\mathrm{T} - \lambda \varepsilon b_m x^\mathrm{T} x - 2 \lambda x^{\mathrm{T}} B^{-1} T \widetilde{\eta} -\\ & -\big[ \lambda d \widetilde\eta^\mathrm{T}\big (\alpha(-T) +(-T)^\mathrm{T}\alpha\big)\widetilde\eta\big]- \\ &-2 \lambda x^\mathrm{T} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^\mathrm{T} \alpha \widetilde I.
+\begin{aligned}\xi f \leqslant & - \varepsilon b_m x^{*} - \lambda \varepsilon b_m x^{*} x - 2 \lambda x^{*} B^{-1} T \widetilde{\eta} -\\ & -\big[ \lambda d \widetilde\eta^{*}\big (\alpha(-T) +(-T)^{*}\alpha\big)\widetilde\eta\big]- \\ &-2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I.
 \end{aligned}
 \end{equation}
-Next, by adding and subtracting the term \\$\widetilde{\eta}^{\mathrm{T}}\big(\frac{\lambda}{\varepsilon b_m}(B^{-1}T)^{\mathrm{T}}(B^{-1}T)\big)\widetilde{\eta}$, we transform \eqref{2.3.9} into:  
+Next, by adding and subtracting the term \\$\widetilde{\eta}^{*}\big(\frac{\lambda}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\big)\widetilde{\eta}$, we transform \eqref{2.3.9} into:  
 \begin{multline}\label{2.3.10}
 % \begin{aligned}
-\xi f \leqslant  -\varepsilon b_m x^{\mathrm{T}}x -\lambda\bigg\|\sqrt{\varepsilon b_m} x - \frac{1}{\sqrt{\varepsilon b_m}} B^{-1}T \widetilde{\eta} \bigg\|^2-\\
-- \widetilde{\eta}^{\mathrm{T}}\bigg( \lambda d \big(\alpha(-T)+(-T)^{\mathrm{T}}\alpha\big) - \\
--\frac{\lambda}{\varepsilon b_m}(B^{-1}T)^{\mathrm{T}}(B^{-1}T)\bigg) \widetilde{\eta} - \\
--2 \lambda x^\mathrm{T} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^\mathrm{T} \alpha \widetilde I.
+\xi f \leqslant  -\varepsilon b_m x^{*}x -\lambda\bigg\|\sqrt{\varepsilon b_m} x - \frac{1}{\sqrt{\varepsilon b_m}} B^{-1}T \widetilde{\eta} \bigg\|^2-\\
+- \widetilde{\eta}^{*}\bigg( \lambda d \big(\alpha(-T)+(-T)^{*}\alpha\big) - \\
+-\frac{\lambda}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\bigg) \widetilde{\eta} - \\
+-2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I.
 % \end{aligned}
 \end{multline}
 Applying condition \textbf{C3$'$}, we further transform \eqref{2.3.10} into:  
 \begin{equation*}\label{2.3.11}
-\xi f \leqslant -\varepsilon b_m x^{\mathrm{T}} x - 2 \lambda x^{\mathrm{T}} B^{-1} \widetilde{I} + 2 \lambda d \widetilde{\eta}^\mathrm{T} \alpha  \widetilde{I}.
+\xi f \leqslant -\varepsilon b_m x^{*} x - 2 \lambda x^{*} B^{-1} \widetilde{I} + 2 \lambda d \widetilde{\eta}^{*} \alpha  \widetilde{I}.
 \end{equation*}
 
 Applying condition \textbf{C1} and the fact that $\widetilde\eta(t) \in \overline{\operatorname{conv}}\big(g(x(t))\big)$:
@@ -2781,30 +2561,30 @@ where $\xi(t) \in \partial V(z(t))$. Let us choose:
 \]
 Taking into account the choice of $\xi (t)$ and formula \eqref{2.4.2}, we expand:
 \begin{equation}\label{2.4.5}
-\begin{aligned} & \frac{\mathbf{d}V(z(t))}{\mathbf{d}t} = \big(-2B^{-1}z+2d\alpha \widetilde{\eta}\big)^{\mathrm{T}}\big(Bz+T\widetilde{\eta}) =\\ 
-% & = -2z^{\mathrm{T}}z+2d\widetilde{\eta}^{\mathrm{T}}\alpha B z - 2z^{\mathrm{T}}B^{-1}T\widetilde{\eta} + 2d \widetilde{\eta}^{\mathrm{T}} \alpha T \widetilde{\eta} =  \\
-& = -2z^{\mathrm{T}}z+2d\widetilde{\eta}^{\mathrm{T}}\alpha B z -  2z^{\mathrm{T}}B^{-1}T\widetilde{\eta} - \\
-&~~~~~~~~~~~~~~~~~~~~~- \big[2d \widetilde{\eta}^{\mathrm{T}} \alpha (-T) \widetilde{\eta} \big]= \\
-& = -2z^{\mathrm{T}}z+2d\widetilde{\eta}^{\mathrm{T}}\alpha B z - 2z^{\mathrm{T}}B^{-1}T\widetilde{\eta} - \\
-& ~~~~~~~~~~~~~~~~~~~~~- \big[ d \widetilde{\eta}^{\mathrm{T}}\big(\alpha(-T)+(-T)^{\mathrm{T}}\alpha\big) \widetilde{\eta}\big] \leqslant\\
-& \leqslant -2\varepsilon b_m z^{\mathrm{T}}z - 2z^{\mathrm{T}}B^{-1}T\widetilde{\eta} -\\&~~~~~~~~~~~~~~~~~~~~~- d \widetilde{\eta}^{\mathrm{T}}\big(\alpha(-T)+(-T)^{\mathrm{T}}\alpha\big) \widetilde{\eta}.
+\begin{aligned} & \frac{\mathbf{d}V(z(t))}{\mathbf{d}t} = \big(-2B^{-1}z+2d\alpha \widetilde{\eta}\big)^{*}\big(Bz+T\widetilde{\eta}) =\\ 
+% & = -2z^{*}z+2d\widetilde{\eta}^{*}\alpha B z - 2z^{*}B^{-1}T\widetilde{\eta} + 2d \widetilde{\eta}^{*} \alpha T \widetilde{\eta} =  \\
+& = -2z^{*}z+2d\widetilde{\eta}^{*}\alpha B z -  2z^{*}B^{-1}T\widetilde{\eta} - \\
+&~~~~~~~~~~~~~~~~~~~~~- \big[2d \widetilde{\eta}^{*} \alpha (-T) \widetilde{\eta} \big]= \\
+& = -2z^{*}z+2d\widetilde{\eta}^{*}\alpha B z - 2z^{*}B^{-1}T\widetilde{\eta} - \\
+& ~~~~~~~~~~~~~~~~~~~~~- \big[ d \widetilde{\eta}^{*}\big(\alpha(-T)+(-T)^{*}\alpha\big) \widetilde{\eta}\big] \leqslant\\
+& \leqslant -2\varepsilon b_m z^{*}z - 2z^{*}B^{-1}T\widetilde{\eta} -\\&~~~~~~~~~~~~~~~~~~~~~- d \widetilde{\eta}^{*}\big(\alpha(-T)+(-T)^{*}\alpha\big) \widetilde{\eta}.
 \end{aligned}
 \end{equation}
-We represent $-2\varepsilon b_m z^{\mathrm{T}}z$ as two terms, then add and subtract $\widetilde{\eta}^{\mathrm{T}}\big(\frac{1}{\varepsilon b_m}(B^{-1}T)^{\mathrm{T}}(B^{-1}T)\big)\widetilde{\eta}$, transforming \eqref{2.4.5} into:
+We represent $-2\varepsilon b_m z^{*}z$ as two terms, then add and subtract $\widetilde{\eta}^{*}\big(\frac{1}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\big)\widetilde{\eta}$, transforming \eqref{2.4.5} into:
 \begin{equation*}\label{2.4.6}
 \begin{aligned} 
-% & = -\varepsilon b_m z^{\mathrm{T}}z  -\varepsilon b_m z^{\mathrm{T}}z - 2z^{\mathrm{T}}B^{-1}T\widetilde{\eta} + d \widetilde{\eta}^{\mathrm{T}}\big(\alpha(-T)+(-T)^{\mathrm{T}}\alpha\big) \widetilde{\eta} =\\
+% & = -\varepsilon b_m z^{*}z  -\varepsilon b_m z^{*}z - 2z^{*}B^{-1}T\widetilde{\eta} + d \widetilde{\eta}^{*}\big(\alpha(-T)+(-T)^{*}\alpha\big) \widetilde{\eta} =\\
 &\frac{\mathbf{d}V(z(t))}{\mathbf{d}t}  =  \\
-&=-\varepsilon b_m z^{\mathrm{T}}z -\bigg\|\sqrt{\varepsilon b_m} z - \frac{1}{\sqrt{\varepsilon b_m}} B^{-1}T \widetilde{\eta} \bigg\|^2-\\
-& \quad- \widetilde{\eta}^{\mathrm{T}}\bigg(d \big(\alpha(-T)+(-T)^{\mathrm{T}}\alpha\big) - \\&~~~~~~~~~~~~~~~~~~~~~~~~~~~-\frac{1}{\varepsilon b_m}(B^{-1}T)^{\mathrm{T}}(B^{-1}T)\bigg) \widetilde{\eta} \leqslant\\
-& \leqslant-\varepsilon b_m z^\mathrm{T}z - \Lambda \widetilde{\eta}^{\mathrm{T}}\widetilde{\eta},
+&=-\varepsilon b_m z^{*}z -\bigg\|\sqrt{\varepsilon b_m} z - \frac{1}{\sqrt{\varepsilon b_m}} B^{-1}T \widetilde{\eta} \bigg\|^2-\\
+& \quad- \widetilde{\eta}^{*}\bigg(d \big(\alpha(-T)+(-T)^{*}\alpha\big) - \\&~~~~~~~~~~~~~~~~~~~~~~~~~~~-\frac{1}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\bigg) \widetilde{\eta} \leqslant\\
+& \leqslant-\varepsilon b_m z^{*}z - \Lambda \widetilde{\eta}^{*}\widetilde{\eta},
 \end{aligned} 
 \end{equation*}
 where $\Lambda = d \lambda_M - \frac{1}{\varepsilon b_m}\|-B^{-1}T\|^2_2>0$ by inequality \eqref{2.3.3}. Since $b_m$ and $\varepsilon$ are positive constants, $\frac{\mathrm{d}}{\mathrm{d} t} V(z(t))$ is negative definite, and by LaSalle invariance principle \cite[Cor. 4.2, p. 129]{p223} applied it to a Lyapunov function that is differentiable almost everywhere, the zero equilibrium point of system \eqref{2.4.1} is globally asymptotically stable. Consequently, the same holds for the equilibrium point $e$ of system \eqref{eq:special}. 
 
 The uniqueness of the equilibrium point can be shown analogously to the reasoning in \cite{eq_ref_11, period_din, eq_ref_2}, where discontinuous activation functions for neural networks were also considered. Suppose that in the transformed system \eqref{2.4.1}, for which the origin is an equilibrium point, there exists another equilibrium point $z' \ne 0$, and $\eta'$ is the corresponding output equilibrium point (see Definition \ref{equilib}). Again by chain rule for regular functions~\cite{p9}, the expression for the derivative of the Lyapunov function along the system trajectories is:
 \[
-\frac{\mathbf{d}V(z')}{\mathbf{d}t} = \big(-2B^{-1}z'+2d\alpha {\eta'}\big)^{\mathrm{T}}\big(Bz'+T {\eta}') = 0 .
+\frac{\mathbf{d}V(z')}{\mathbf{d}t} = \big(-2B^{-1}z'+2d\alpha {\eta'}\big)^{*}\big(Bz'+T {\eta}') = 0 .
 \]
 By definition of the system's equilibrium point, the right-hand term vanishes, which contradicts the negative definiteness ($\frac{\mathbf{d}V(z(t))}{\mathbf{d}t} < 0 $ for $z \ne 0$).
 \end{IEEEproof}
@@ -2815,30 +2595,30 @@ By definition of the system's equilibrium point, the right-hand term vanishes, w
 
 \begin{IEEEproof}[Proof of Lemma~\ref{lem:qubo-unique}]
 Fix $i \in \{1,\dots,n\}$ and let $s^{(i)}$ be the configuration obtained
-from $s^\star$ by flipping the $i$th spin:
+from $s'$ by flipping the $i$th spin:
 \[
   s^{(i)}_j =
   \begin{cases}
-    -s_i^\star, & j = i,\\
-    s_j^\star,  & j \neq i.
+    -s_i', & j = i,\\
+    s_j',  & j \neq i.
   \end{cases}
 \]
 We compute the energy difference
-$\Delta_i := E(s^{(i)}) - E(s^\star)$.
+$\Delta_i := E(s^{(i)}) - E(s')$.
 Write $E(s) = \frac{1}{2} s^* Q s - h^* s$ and
-let $\delta := s^{(i)} - s^\star$.
+let $\delta := s^{(i)} - s'$.
 Since only the $i$th component flips, we have
-$\delta = -2 s_i^\star e_i$, where $e_i$ is the $i$th canonical basis vector.
+$\delta = -2 s_i' e_i$, where $e_i$ is the $i$th canonical basis vector.
 Then
 \begin{align*}
   \Delta_i
-  &= \frac{1}{2}\bigl((s^\star+\delta)^* Q (s^\star+\delta)
-      - (s^\star)^* Q s^\star\bigr) - h^* \delta \\
+  &= \frac{1}{2}\bigl((s'+\delta)^* Q (s'+\delta)
+      - (s')^* Q s'\bigr) - h^* \delta \\
   &= s^{\star^*} Q \delta + \frac{1}{2} \delta^* Q \delta - h^* \delta.
 \end{align*}
-Using $\delta_j = 0$ for $j \neq i$ and $\delta_i = -2 s_i^\star$, we obtain
+Using $\delta_j = 0$ for $j \neq i$ and $\delta_i = -2 s_i'$, we obtain
 \[
-  s^{\star^*} Q \delta = (Q s^\star)_i \delta_i,
+  s^{\star^*} Q \delta = (Q s')_i \delta_i,
   \qquad
   \delta^* Q \delta = \delta_i^2 Q_{ii} = 4 Q_{ii},
   \qquad
@@ -2847,96 +2627,99 @@ Using $\delta_j = 0$ for $j \neq i$ and $\delta_i = -2 s_i^\star$, we obtain
 Hence
 \begin{align*}
   \Delta_i
-  &= (Q s^\star)_i (-2 s_i^\star) + 2 Q_{ii} - h_i (-2 s_i^\star) \\
-  &= -2 s_i^\star (Q s^\star)_i + 2 Q_{ii} + 2 h_i s_i^\star.
+  &= (Q s')_i (-2 s_i') + 2 Q_{ii} - h_i (-2 s_i') \\
+  &= -2 s_i' (Q s')_i + 2 Q_{ii} + 2 h_i s_i'.
 \end{align*}
-Next expand $(Q s^\star)_i = Q_{ii} s_i^\star + \sum_{j \neq i} Q_{ij} s_j^\star$.
+Next expand $(Q s')_i = Q_{ii} s_i' + \sum_{j \neq i} Q_{ij} s_j'$.
 Then
 \[
-  s_i^\star (Q s^\star)_i
-  = Q_{ii} + s_i^\star \sum_{j \neq i} Q_{ij} s_j^\star,
+  s_i' (Q s')_i
+  = Q_{ii} + s_i' \sum_{j \neq i} Q_{ij} s_j',
 \]
 and therefore
 \begin{align*}
   \Delta_i
-  &= -2\Bigl[Q_{ii} + s_i^\star \sum_{j \neq i} Q_{ij} s_j^\star\Bigr]
-     + 2 Q_{ii} + 2 h_i s_i^\star \\
-  &= -2 s_i^\star \sum_{j \neq i} Q_{ij} s_j^\star + 2 h_i s_i^\star \\
-  &= 2 s_i^\star \Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j^\star\Bigr).
+  &= -2\Bigl[Q_{ii} + s_i' \sum_{j \neq i} Q_{ij} s_j'\Bigr]
+     + 2 Q_{ii} + 2 h_i s_i' \\
+  &= -2 s_i' \sum_{j \neq i} Q_{ij} s_j' + 2 h_i s_i' \\
+  &= 2 s_i' \Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j'\Bigr).
 \end{align*}
-Using $s_i^\star = \operatorname{sign}(h_i)$ and the strong field condition
-\eqref{eq:strong-field}, we estimate
+Using $s_i' = \operatorname{sign}(h_i)$ and the strong field condition
+\ref{eq:strong-field}, we estimate
 \[
-  \Bigl| \sum_{j \neq i} Q_{ij} s_j^\star \Bigr|
+  \Bigl| \sum_{j \neq i} Q_{ij} s_j' \Bigr|
   \leq \sum_{j \neq i} |Q_{ij}|
   < |h_i|.
 \]
 Hence
 \[
-  s_i^\star\Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j^\star\Bigr)
-  \geq |h_i| - \Bigl|\sum_{j \neq i} Q_{ij} s_j^\star\Bigr|
+  s_i'\Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j'\Bigr)
+  \geq |h_i| - \Bigl|\sum_{j \neq i} Q_{ij} s_j'\Bigr|
   > 0,
 \]
 and thus $\Delta_i > 0$ for all $i=1,\dots,n$:
-flipping any single spin in $s^\star$ strictly increases the energy $E$.
-Therefore $s^\star$ is a strict local minimizer of~$E$.
+flipping any single spin in $s'$ strictly increases the energy $E$.
+Therefore $s'$ is a strict local minimizer of~$E$.
 
-Now take any $s \in \{-1,1\}^n$ with $s \neq s^\star$.
-There exists a finite sequence of single-spin flips transforming $s^\star$
+Now take any $s \in \{-1,1\}^n$ with $s \neq s'$.
+There exists a finite sequence of single-spin flips transforming $s'$
 into $s$:
 \[
-  s^\star = s^{(0)} \to s^{(1)} \to \dots \to s^{(k)} = s.
+  s' = s^{(0)} \to s^{(1)} \to \dots \to s^{(k)} = s.
 \]
 At each step the energy strictly increases,
 $E(s^{(\ell+1)}) > E(s^{(\ell)})$, $\ell=0,\dots,k-1$.
 Hence
 \[
-  E(s) = E(s^{(k)}) > E(s^{(k-1)}) > \dots > E(s^{(0)}) = E(s^\star),
+  E(s) = E(s^{(k)}) > E(s^{(k-1)}) > \dots > E(s^{(0)}) = E(s'),
 \]
-which shows that $s^\star$ is the unique global minimizer of~$E$.
+which shows that $s'$ is the unique global minimizer of~$E$.
 \end{IEEEproof}
 
 \medskip
 Lemma~\ref{lem:qubo-unique} identifies a nontrivial subclass of QUBO problems
 (``QUBO with strong field'') for which the optimizer is unique and given by
-$s^\star = \operatorname{sign}(h)$.
+$s' = \operatorname{sign}(h)$.
 
 \medskip
 \begin{IEEEproof}[Proof of Theorem~\ref{th:hnn-solves-strong-field-qubo}]
 By Lemma~\ref{lem:qubo-unique} and the strong field
 condition~\eqref{eq:strong-field} the QUBO problem~\eqref{eq:qubo-energy}
-has a unique global minimizer $s^\star = \operatorname{sign}(h)$.
+has a unique global minimizer 
+\begin{equation}\label{eq:sign-activation}
+s' = \operatorname{sign}(h).
+\end{equation}
 
 The activation~\eqref{eq:sign-activation} satisfies \textbf{C1--C2} and, by construction,
 $T = -\beta Q_{\mathrm{shift}}$ with $Q_{\mathrm{shift}} \succ 0$ implies
 $T+T^* \prec 0$, so that \textbf{C3} holds (with $\alpha=I$).
-Therefore, by Theorem~\ref{th:global-stability}, system~\eqref{eq:hnn-qubo}
-has a unique globally asymptotically stable Filippov equilibrium $x^\star$,
+Therefore, by Theorem~\ref{thm:main}, system~\eqref{eq:hnn-qubo}
+has a unique globally asymptotically stable Filippov equilibrium $x'$,
 and any Filippov solution $x(\cdot)$ of~\eqref{eq:hnn-qubo} satisfies
-$x(t) \to x^\star$ as $t \to +\infty$.
+$x(t) \to x'$ as $t \to +\infty$.
 
 At a Filippov equilibrium one has
 \[
-  0 \in B x^\star - \beta Q_{\mathrm{shift}} G^\star + \beta h,
+  0 \in B x' - \beta Q_{\mathrm{shift}} G' + \beta h,
 \]
-where $G^\star$ is the Filippov set of possible activation values at $x^\star$.
+where $G'$ is the Filippov set of possible activation values at $x'$.
 Under the strong field condition~\eqref{eq:strong-field} the external field
-$h_i$ cannot be balanced by the couplings $\{Q_{ij}\}_{j \neq i}$ if $x_i^\star = 0$:
+$h_i$ cannot be balanced by the couplings $\{Q_{ij}\}_{j \neq i}$ if $x_i' = 0$:
 for any convex combination of neighbor contributions we still have
 $|h_i| > \sum_{j \neq i} |Q_{ij}|$, so $0$ cannot belong to the right-hand side
 of the $i$th scalar equilibrium inclusion.
-Hence no equilibrium can have $x_i^\star = 0$, and therefore
-$g(x^\star) = \operatorname{sign}(x^\star)$ is single-valued and lies in
+Hence no equilibrium can have $x_i' = 0$, and therefore
+$g(x') = \operatorname{sign}(x')$ is single-valued and lies in
 $\{-1,1\}^n$.
 
-Denote $s := g(x^\star) = \operatorname{sign}(x^\star)$.
+Denote $s := g(x') = \operatorname{sign}(x')$.
 The equilibrium condition for~\eqref{eq:hnn-qubo} can be written as
 \[
-  0 = B x^\star - \beta Q_{\mathrm{shift}} s + \beta h,
+  0 = B x' - \beta Q_{\mathrm{shift}} s + \beta h,
 \]
 that is,
 \[
-  x^\star = B^{-1} \beta (Q_{\mathrm{shift}} s - h).
+  x' = B^{-1} \beta (Q_{\mathrm{shift}} s - h).
 \]
 Thus any equilibrium uniquely determines a spin vector $s \in \{-1,1\}^n$.
 Conversely, if $s \in \{-1,1\}^n$ and we define
@@ -2944,10 +2727,10 @@ $x(s) := B^{-1} \beta (Q_{\mathrm{shift}} s - h)$, then $(x(s),s)$ would be
 an equilibrium pair provided that $\operatorname{sign}(x(s)) = s$.
 The same single-spin flip argument as in Lemma~\ref{lem:qubo-unique} and the
 strong field condition~\eqref{eq:strong-field} imply that the only spin vector
-consistent with such a relation is precisely $s^\star$.
-Therefore $g(x^\star) = s^\star$.
+consistent with such a relation is precisely $s'$.
+Therefore $g(x') = s'$.
 
-Finally, by Lemma~\ref{lem:qubo-unique}, $s^\star$ is the unique global minimizer
+Finally, by Lemma~\ref{lem:qubo-unique}, $s'$ is the unique global minimizer
 of the QUBO energy~\eqref{eq:qubo-energy}.
 This completes the proof.
 \end{IEEEproof}
