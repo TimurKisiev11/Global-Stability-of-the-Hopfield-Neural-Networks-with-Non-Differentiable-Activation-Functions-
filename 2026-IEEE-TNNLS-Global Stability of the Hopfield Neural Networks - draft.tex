@@ -1,12 +1,11 @@
 \documentclass[journal]{IEEEtran}
-% *** 20.04.2026 
-%remove repeating Lur'e form equations 
-% ^{*} -> '
-%\ast -> '
-% ^\star -> '
-% fix eq ref eq:sign-activation eq:strong-field and others
+% *** 23.04.2026 
+% fix 43 
+% \overline 
+
 
 \usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{graphicx}
 % \usepackage{cite}
@@ -28,6 +27,13 @@
 \newtheorem{definition}{Definition}
 \newtheorem{remark}{Remark}
 \newtheorem{proof}{Proof}
+
+
+\newtheorem{assumption1}{Assumption C1}
+\newtheorem{assumption2}{Assumption C2}
+\newtheorem{assumption3}{Assumption C3}
+\newtheorem{assumption3mat}{Assumption C3}
+
 
 % Real n-dimensional space
 \newcommand{\R}{\mathbb{R}}
@@ -63,8 +69,8 @@
 We study global stability of continuous-time Hopfield neural networks with 
 \emph{discontinuous, possibly non-monotone and unbounded} activations. 
 Modeling the dynamics as a \emph{Filippov differential inclusion}, 
-we derive three verifiable conditions (C1--C3) --- linear growth, componentwise one-sided Lipschitz, 
-and \emph{YLG-type frequency condition} --- under which the network admits a \emph{unique equilibrium} 
+we derive three verifiable conditions --- linear growth, componentwise one-sided Lipschitz, 
+and \emph{frequency condition} --- under which the network admits a \emph{unique equilibrium} 
 that is \emph{globally asymptotically stable}. 
 The proof leverages the Yakubovich--Leonov--Gelig (YLG) quadratic-plus-integral functional, 
 avoiding smoothness assumptions and extending classical bounded/monotone results. 
@@ -815,16 +821,16 @@ nondecreasing.  In particular, its Filippov convexification
 $\mathrm{conv}\,g_i$ is a monotone, piecewise single–valued
 multifunction in the sense of YLG.
 
-\begin{assumption}[\bf C1: Linear growth]\label{ass:C1}
+\begin{assumption1}[\bf Linear growth]\label{ass:C1}
 For each $i\in\{1,\dots,n\}$ there exist constants $a_i,b_i\ge 0$ such
 that
 \[
   |g_i(\xi)| \le a_i|\xi| + b_i,
   \qquad \forall\,\xi\in\mathbb{R}.
 \]
-\end{assumption}
+\end{assumption1}
 
-\begin{assumption}[\bf C2: One-sided Lipschitz (componentwise)]\label{ass:C2}
+\begin{assumption2}[\bf One-sided Lipschitz (componentwise)]\label{ass:C2}
 For each $i\in\{1,\dots,n\}$ there exists $C_i\in\mathbb{R}$ such that
 for all $x,y\in\mathbb{R}^n$ and for all a.e.\ selections
 $\eta\in\mathrm{conv}\,g(x)$, $\zeta\in\mathrm{conv}\,g(y)$ one has
@@ -832,7 +838,7 @@ $\eta\in\mathrm{conv}\,g(x)$, $\zeta\in\mathrm{conv}\,g(y)$ one has
   (\eta_i - \zeta_i)\,(x_i - y_i)
   \;\le\; C_i\,(x_i - y_i)^2.
 \]
-\end{assumption}
+\end{assumption2}
 
 \begin{remark}
 Assumption~\textbf{C2} is also known as a \emph{unilateral
@@ -855,9 +861,9 @@ For the purposes of applying the YLG theory we write
 and the extended nonlinearity
 \[
   \varphi(\sigma)
-  := \mathrm{conv}\,g(\sigma)
-  = \bigl(\mathrm{conv}\,g_1(\sigma_1),\dots,
-          \mathrm{conv}\,g_n(\sigma_n)\bigr)^* .
+  := \overline{\mathrm{conv}}\,g(\sigma)
+  = \bigl(\overline{\mathrm{conv}}\,g_1(\sigma_1),\dots,
+          \overline{\mathrm{conv}}\,g_n(\sigma_n)\bigr)^* .
 \]
 The transfer matrix of the linear part is
 \begin{equation}\label{eq:transfer-X}
@@ -870,7 +876,7 @@ The transfer matrix of the linear part is
 % ------------------------------------------------
 % Main third assumption: frequency-domain condition
 % ------------------------------------------------
-\begin{assumption}[\bf C3: YLG-type frequency condition]\label{ass:C3prime}
+\begin{assumption3}[\bf YLG-type frequency condition]\label{ass:C3prime}
 The transfer matrix $X(\lambda)$ in \eqref{eq:transfer-X} is
 irreducible in the sense of Definition~2.6 in Chapter~2 of YLG
 (i.e.\ the pair $(P,r)=(-B,I_n)$ is observable), and there exist
@@ -897,7 +903,7 @@ and
   \quad\text{whenever}\quad 
   \det(P-\lambda I)=\det(-B-\lambda I)=0.
 \end{multline}
-\end{assumption}
+\end{assumption3}
 
 Assumption~\textbf{C3} is exactly the frequency-domain hypothesis
 \textup{(i)}–\textup{(ii)} of Theorem~3.1 in Chapter~3 of YLG,
@@ -907,13 +913,13 @@ specialized to the triple $(P,q,r)=(-B,T,I_n)$ of the Hopfield model.
 % Alternative algebraic formulation (derived from C3)
 % ------------------------------------------------
 
-\begin{assumption}[\bf C3$'$: Diagonal Lyapunov stability (DLS)]\label{ass:C3}
+\begin{assumption3mat}[\bf Diagonal Lyapunov stability (DLS)]\label{ass:C3}
 There exists a diagonal matrix $H=\mathrm{diag}(h_1,\dots,h_n)\succ 0$
 and a constant $\alpha\ge 0$ such that
 \begin{equation}\label{eq:C3-matrix}
   -HB - B^{*}H + \alpha\bigl(T^{*}H + HT\bigr) \prec 0 .
 \end{equation}
-\end{assumption}
+\end{assumption3mat}
 
 Assumption~\textbf{C3$'$} will be used only as a derived, purely
 state–space condition.  It can be taken as an alternative to
@@ -2614,11 +2620,11 @@ Then
   \Delta_i
   &= \frac{1}{2}\bigl((s'+\delta)^* Q (s'+\delta)
       - (s')^* Q s'\bigr) - h^* \delta \\
-  &= s^{\star^*} Q \delta + \frac{1}{2} \delta^* Q \delta - h^* \delta.
+  &= s'^{*} Q \delta + \frac{1}{2} \delta^* Q \delta - h^* \delta.
 \end{align*}
 Using $\delta_j = 0$ for $j \neq i$ and $\delta_i = -2 s_i'$, we obtain
 \[
-  s^{\star^*} Q \delta = (Q s')_i \delta_i,
+  s'^{*} Q \delta = (Q s')_i \delta_i,
   \qquad
   \delta^* Q \delta = \delta_i^2 Q_{ii} = 4 Q_{ii},
   \qquad
@@ -2645,7 +2651,7 @@ and therefore
   &= 2 s_i' \Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j'\Bigr).
 \end{align*}
 Using $s_i' = \operatorname{sign}(h_i)$ and the strong field condition
-\ref{eq:strong-field}, we estimate
+\eqref{eq:strong-field}, we estimate
 \[
   \Bigl| \sum_{j \neq i} Q_{ij} s_j' \Bigr|
   \leq \sum_{j \neq i} |Q_{ij}|
