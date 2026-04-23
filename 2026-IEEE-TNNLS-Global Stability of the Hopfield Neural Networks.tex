@@ -1,0 +1,2748 @@
+\documentclass[journal]{IEEEtran}
+% *** 23.04.2026 
+% fix 43 
+% \overline 
+
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+% \usepackage{cite}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{url}
+\usepackage{enumitem}
+% \usepackage{biblatex}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+
+% *** THEOREM-LIKE ENVIRONMENTS ***
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{proof}{Proof}
+
+
+\newtheorem{assumption1}{Assumption C1}
+\newtheorem{assumption2}{Assumption C2}
+\newtheorem{assumption3}{Assumption C3}
+\newtheorem{assumption3mat}{Assumption C3}
+
+
+% Real n-dimensional space
+\newcommand{\R}{\mathbb{R}}
+% Diagonal matrix operator
+\DeclareMathOperator{\diag}{diag}
+% Convex hull operator
+\DeclareMathOperator{\conv}{conv}
+% Filippov convexification of g (closure of conv g)
+% Usage: \convg(x) = \overline{\operatorname{conv}}\,g(x)
+\newcommand{\convg}{\overline{\operatorname{conv}}\,g}
+% \newcommand{\convg}{\overline{\operatorname{conv}}}
+\newcommand{\const}{\text{const}}
+
+\usepackage{todonotes}
+
+% real author/affiliation block for the camera-ready version
+\title{Global Stability of the Hopfield Neural Networks\\ with Non-Differentiable Activation Functions:\\
+            a Yakubovich--Leonov--Gelig Perspective}
+
+\author{Timur N. Mokaev \and Timur A. Kisiev \and Nikolay V. Kuznetsov
+      \thanks{Submitted to \emph{IEEE Transactions on Neural Networks and Learning Systems} (TNNLS). 
+            For review, author names and affiliations are withheld to preserve double-anonymous peer review.}
+}
+
+
+% *** START DOCUMENT ***
+\addbibresource{ref.bib}
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We study global stability of continuous-time Hopfield neural networks with 
+\emph{discontinuous, possibly non-monotone and unbounded} activations. 
+Modeling the dynamics as a \emph{Filippov differential inclusion}, 
+we derive three verifiable conditions --- linear growth, componentwise one-sided Lipschitz, 
+and \emph{frequency condition} --- under which the network admits a \emph{unique equilibrium} 
+that is \emph{globally asymptotically stable}. 
+The proof leverages the Yakubovich--Leonov--Gelig (YLG) quadratic-plus-integral functional, 
+avoiding smoothness assumptions and extending classical bounded/monotone results. 
+We further embed QUBO (including planted MAX-CUT), soft-margin SVM, and constrained optimal control tasks 
+into this discontinuous-activation Hopfield template and verify that each satisfies our conditions, with simulations confirming convergence from arbitrary initial conditions. 
+These results broaden the class of optimization problems solvable by Hopfield networks with rigorous global guarantees.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Hopfield neural networks, 
+global asymptotic stability, 
+discontinuous activation, 
+Filippov differential inclusions, 
+Yakubovich--Leonov--Gelig theory.
+\end{IEEEkeywords}
+
+% \markboth{IEEE Transactions on Neural Networks and Learning Systems}{Anonymous: Global Stability of HNNs with Non-Differentiable Activations}
+
+\section{Introduction}\label{sec:intro}
+\IEEEPARstart{H}{opfield} neural networks (HNNs) play a dual role in neural computation.
+First, they act as \emph{associative memories} (content--addressable stores) defined by a
+decreasing energy function~\cite{hopfield1982}; second, the very same architecture functions as an
+\emph{analog optimizer} whose equilibrium encodes a low-cost solution of a constrained,
+often combinatorial, problem~\cite{hopfieldTank1985}.
+Both viewpoints are naturally unified by \emph{stability theory}.
+Two regimes are central: \emph{multistability}---many locally attractive equilibria enabling memory---and
+\emph{monostability} (global stability)---a unique globally attractive equilibrium needed for deterministic optimization.
+This paper focuses on the second regime while keeping the first in view to emphasize the model's dual nature.
+
+\textbf{Motivation.} Modern large-capacity Hopfield variants adjust the energy/activation design to
+improve expressivity---from dense associative memories with polynomial--to--exponential capacity growth
+\cite{krotovHopfield2016,demircigil2017} to ``modern'' Hopfield layers
+linked to softmax attention~\cite{ramsauer2020}. The resulting activations are
+\emph{non-smooth} (hard limiters, quantizers, dead-zones) or \emph{unbounded/continuous} (softmax-type),
+and the dynamics is more faithfully modeled as a \emph{Filippov differential inclusion}.
+Classical Lyapunov analyses that assume smooth, bounded, monotone nonlinearities are therefore
+insufficient to certify global convergence in these practically relevant settings.
+
+\textbf{GAS with discontinuous activations.}
+For bounded monotone discontinuous activations, Forti and Nistri established existence of a
+\emph{unique globally asymptotically stable} (GAS) equilibrium for HNNs~\cite{p1}.
+However, hardware-friendly and optimization-driven designs often deploy
+piecewise-linear or hard-limiter maps and unbounded gains; discontinuous penalties also arise in exact
+exterior methods. Extending GAS guarantees beyond the bounded/monotone class is thus essential
+for positioning HNNs as reliable analog optimizers.
+
+\textbf{YLG perspective.}
+The Yakubovich--Leonov--Gelig (futher --- YLG) absolute-stability framework provides a quadratic-plus-integral
+Lyapunov functional tailored to Lur\'e systems with sector/slope-restricted nonlinearities~\cite{YLG}.
+It is well suited to Filippov right-hand sides and has been refined in subsequent works for
+discontinuous dynamics~\cite{Boikov2008,RajchakitAgarwalRamalingam2021}. We build on this perspective.
+
+\subsection{Contributions}\label{sec:intro:contrib}
+We consider continuous-time HNNs with componentwise activations that may be discontinuous, non-monotone, and unbounded.
+Our main contributions are as follows.
+\begin{enumerate}[label=\textbf{(\alph*)},leftmargin=*]
+\item \textbf{Filippov HNN model.} We formulate an HNN with \emph{piecewise--continuous} activations
+      having finitely many first-order jumps and interpret the dynamics as a \emph{Filippov differential inclusion}.
+\item \textbf{Three verifiable hypotheses.} 
+      We introduce \textbf{C1--C3} --- linear growth, componentwise one-sided
+      Lipschitz, and a \emph{YLG-type frequency condition} --- and show via a YLG
+      quadratic\,+\,integral functional that \emph{existence, uniqueness, and GAS} of the equilibrium hold.
+\item \textbf{Optimization embeddings.} We demonstrate that standard penalty embeddings of
+      MAX-CUT, TSP,soft-margin SVM and constrained optimal control tasks satisfy \textbf{C1--C3}.
+\end{enumerate}
+
+\subsection{Organization}\label{sec:intro:org}
+Section~\ref{sec:related} reviews related work.
+Section~\ref{sec:prelim} recalls biological and mathematical models of HNNs,
+Filippov solutions and the YLG framework.
+Section~\ref{sec:problem} states the HNN model in the Lur\'{e} form and assumptions~\textbf{C1--C3}. Section~\ref{sec:nonunique} presents a low-dimensional example showing that 
+these assumptions ensure global asymptotic stability of the unique equilibrium 
+but do not guarantee forward uniqueness of Filippov trajectories. Section~\ref{sec:main} presents the main results on uniqueness and GAS and discusses tightness.
+Section~\ref{sec:examples} contains some numerical illustrations, followed by Sections~\ref{sec:qubo-hnn}, \ref{sec:penalty-HNN} and \ref{sec:application_control} that verify \textbf{C1--C3} for four optimization embeddings.
+Conclusions are drawn in Section~\ref{sec:concl}.
+
+Full proofs and algorithmic checks appear in technical appendices.
+
+
+\section{Related Work}\label{sec:related}
+
+The stability of continuous–time Hopfield–type networks has been surveyed extensively; 
+see the comprehensive review of Zhang~\emph{et al.}, 
+which compares algebraic-inequality, M-matrix, LMI, and Lyapunov diagonal-stability (LDS) criteria 
+and stresses that no single form dominates across models or assumptions~\cite{ZhangTNNLSReview2014}. 
+In the same spirit, a recent tutorial review for HNNs collects classical sufficient conditions 
+(Gershgorin–disc bounds, diagonal stability, negative semidefiniteness, matrix–norm methods) 
+and their scope of applicability~\cite{BoykovRoudnev2022}. 
+These surveys also highlight open issues for large–scale 
+or nonstandard topologies and for models with non-smooth elements.
+
+\subsection{Discontinuous Activations and Nonsmooth Tools}
+
+A key departure from early HNN analyses is to allow discontinuous 
+or merely piecewise–continuous activations. 
+Forti and Nistri established global convergence of neural networks 
+with discontinuous neuron activations by recasting the dynamics as a differential inclusion 
+and extending LaSalle’s invariance principle to nonsmooth settings; 
+they also connected Filippov/Clarke tools with Lyapunov arguments 
+and reported related finite–time phenomena~\cite{p1}. 
+Subsequent work on discontinuous systems sharpened the analytical toolkit 
+via generalized gradients and set–valued dynamics, 
+yielding Lyapunov and invariance results tailored 
+to differential inclusions~\cite{ShevitzPaden1994,CortesTutorial2008,YLG}.
+For models interpreted in the Filippov sense, 
+existence, uniqueness and ''weak/strong'' stability notions are standard; 
+tutorials make precise when Filippov solutions are the physically meaningful choice 
+(e.g., circuits with switches, sliding modes) and summarize the calculus rules used in proofs~\cite{CortesTutorial2008}.
+
+\subsection{Multistability vs. Global Stability}
+In the attractor–memory regime, multistability is desirable and widely analyzed 
+(e.g., piecewise–linear or nonmonotone activations producing many equilibria). 
+Representative results of~\cite{NieZheng2015} establish exponential stability 
+of multiple equilibria under structured interconnections and discontinuous nonlinearities. 
+By contrast, optimization applications require a \emph{unique} globally attracting equilibrium 
+to avoid spurious minima. 
+Reviews emphasize this distinction and motivate conditions ensuring existence/uniqueness plus GAS 
+of the single equilibrium~\cite{ZhangTNNLSReview2014}. 
+Moreover, unbounded activations are common in optimization-driven networks 
+(e.g., to encode inequality penalties), which pushes beyond the bounded/Lipschitz assumptions 
+of classical analyses~\cite{NieZheng2015}.
+
+\subsection{Optimization-oriented Neural Dynamics}
+
+A parallel line of works treat HNN-like systems as continuous-time solvers for constrained, 
+possibly nonsmooth programs. 
+Li~\emph{et al.} analyze a generalized Hopfield network for nonsmooth constrained convex optimization 
+using Filippov inclusions and extended LaSalle arguments; 
+their model accommodates exact penalties and constraint qualifications typical of optimization~\cite{LiTNNLS2015}. 
+In this way, Hopfield networks are placed in direct correspondence 
+with the theory of nonsmooth gradient flows and projected dynamical systems 
+developed under differential-inclusion formulations.
+
+
+The foundation for the network’s architecture is the penalty method~\cite{penalty, 517}, where the constrained problem is transformed into an unconstrained minimization through exterior penalty that fits the Hopfield framework, which involves a gradient system of the energy function. This energy function is composed of the objective function and the constraint functions of a particular optimization problem in such a way to provide correlation between optimal solution equation and stationary condition for the network. Solution computation involves providing initial states (voltages) to the neurons, after which the neural network converges to a stable equilibrium point that corresponds to the minimum of the energy function, which in turn corresponds to the minimum
+of the cost function. Therefore, it is crucial for such systems to have a unique globally asymptotically stable equilibrium state.
+
+Providing new stability results for larger class of activation functions can subsequently extend the class of problems that the network can solve. This is because the energy function allows for the definition of activation functions, neuron connections,and the input data for the network and represents the main objective function of optimization problem, therefore, particular activation function can reflect the type of problem to solve.
+
+A necessary condition for the convergence of the penalty method in finite time is the use discontinuous functions in the constraints ~\cite{517}. These functions are represented by the activation functions of the neurons in the network, which raises the issue of the stability of networks with non-smooth activations.
+
+For example, HNN with non-smooth activations (e.g., Heaviside step functions) establishes a framework for solving the Quadratic Unconstrained Binary Optimization problem (QUBO). By directly mapping discrete decision variables to the network’s states, one can embed QUBO problems like MAX-CUT into an energy-minimization framework. This approach eliminates the need for stochastic annealing or parameter tuning, offering deterministic convergence
+even for indefinite Q matrices.
+
+\textbf{Positioning.}
+Our work fits squarely in the ''global-stability/unique equilibrium'' branch 
+and is closest in spirit to Forti–Nistri and to optimization-oriented Filippov analyses. 
+Relative to these, we 
+(i) allow piecewise–continuous activations with finitely many first-order discontinuities 
+(including unbounded and nonmonotone cases), 
+(ii) provide easy-to-check structural hypotheses (matrix negativity, unilateral Lipschitz-like slope bounds, 
+diagonal dominance), and 
+(iii) prove finite-time entrance into shrinking neighborhoods, thereby bridging discontinuous activation models 
+used in exact-penalty embeddings with the strong GAS guarantees required by analogue optimizers.
+
+\section{Preliminaries}\label{sec:prelim}
+\subsection{Notation}
+
+\begin{align*}
+&\mathbb{R}^n &\quad&\text{Real } n \text{ space.}\\
+&A = [A_{ij}] \in \mathbb{R}^{n \times n} &\quad&\text{Square matrix.}\\
+&A^{*} &\quad&\text{Transpose of } A.\\
+&A^{-1} &\quad&\text{Inverse of } A.\\
+&A^S = \tfrac{1}{2}(A + A^{*}) &\quad&\text{Symmetric part of } A.\\
+&\text{ker } A &\quad&\text{Kernel of } A.\\
+&\lambda_m\{A\} &\quad&\text{Minimum eigenvalue of } A.\\
+&\lambda_M\{A\} &\quad&\text{Maximum eigenvalue of } A.\\
+&\|A\| &\quad&\text{Matrix norm of } A.\\
+&\|A\|_2 = [\Lambda_M\{A^{*}A\}]^{1/2} &\quad&2 \text{ norm of } A.\\
+&\alpha = \text{diag}(\alpha_1, \cdots, \alpha_n) \in \mathbb{R}^{n \times n} &\quad&\text{Diagonal matrix.}\\ 
+&x = (x_1, \cdots, x_n)^{*} \in \mathbb{R}^n &\quad&\text{Column vector.}\\
+&\|x\|_2 = \left[\sum_{i=1}^n x_i^2\right]^{1/2} &\quad&\text{Euclidean norm of } x.\\
+&\|x\| &\quad&\text{Vector norm of } x \text{,}\\
+& & &\text{denotes }\|x\|_2.\\ 
+&\operatorname{conv}(E) &\quad&\text{Convex hull of } E.\\
+&\overline{E} &\quad&\text{Closure of set } E \subset \mathbb{R}^n.
+\end{align*}
+
+
+
+\subsection{Biological and Mathematical Models of HNNs}\label{sec:biomath}
+
+\textbf{Biological motivation.}
+Hopfield’s model was inspired by the organization of the brain: 
+large populations of neurons interconnected via synapses, 
+transmitting electrical signals along axons and receiving them through dendrites (Fig.~\ref{neuron}). 
+The underlying biophysics views each neuron as an excitable membrane whose \emph{membrane potential} 
+evolves due to ionic currents (primarily Na$^+$ and K$^+$), 
+exhibits all–or–nothing \emph{spikes} once a threshold is exceeded, 
+and then enters a \emph{refractory} state. 
+The classical Hodgkin–Huxley approach~\cite{p224} formalizes this in terms of circuit elements 
+(capacitors, voltage–dependent conductances, current sources), 
+providing a principled bridge from physiology to circuit models (Fig.~\ref{circuit}). 
+In the Hopfield abstraction, the detailed spike shape is replaced 
+by a static nonlinear \emph{activation map}, 
+while the membrane integrator and synaptic couplings remain 
+as the core dynamical ingredients.
+
+\begin{figure*}[!ht]
+\begin{minipage}{0.49\linewidth}
+\includegraphics[width=1\textwidth]{Figures/neuron_small.png}
+\caption{Biological neurons and their connections.} \label{neuron}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\linewidth}
+\centering
+\includegraphics[width=0.68\textwidth]{Figures/circuit_mod.png}
+\caption{Electronic circuit modeling the neural network.} \label{circuit}
+\end{minipage}
+\end{figure*}
+
+\medskip
+\textbf{Kirchhoff–circuit interpretation.}
+Consider a network of $n$ nodes (neurons). At node $j$, let $x_j(t)$ denote the voltage (state), $C_j>0$ the membrane capacitance, and $R_j>0$ the leak resistance. Synaptic couplings from node $i$ to node $j$ are represented by conductances $T_{ji}$, and $g_i(\cdot)$ is the static (possibly non-smooth) activation associated with node $i$. With an external bias current $I_j$, Kirchhoff’s current law gives
+\begin{equation}
+  C_j\,\dot{x}_j(t) + \frac{1}{R_j}\,x_j(t) =
+  \sum_{i=1}^n T_{ji}\, g_i \big(x_i(t)\big) \;+\; I_j,
+  \quad j=1,\dots,n.                                    
+  \label{eq:kcl}
+\end{equation}
+Stacking \eqref{eq:kcl} and rescaling by the capacitances yields the standard form of the Hopfield network:
+\begin{equation}
+  \dot{x}(t) =
+  -B\,x(t)\;+\;T\,g \big(x(t)\big)\;+\;I,
+  \qquad x(t)\in\mathbb{R}^n,                             
+  \label{eq:special}
+\end{equation}
+where $B=\mathrm{diag}(b_1,\dots,b_n)\succ 0$ collects effective leak rates ($b_j:=1/(R_j C_j)$ after rescaling), $T\in\mathbb{R}^{n\times n}$ is the interconnection matrix (with signs admitting excitatory/inhibitory effects), $g(x)=(g_1(x_1),\ldots,g_n(x_n))^*$ acts componentwise, and $I\in\mathbb{R}^n$ is the (rescaled) input vector. This compact representation makes explicit the split between linear passive dynamics and static nonlinearities, a structure central to absolute–stability analyses.
+
+% \medskip
+% \textbf{Non-smooth activations and Filippov trajectories.}
+
+\subsection{Non-smooth activations and Filippov solutions}
+
+In many applications the activation function in the right-hand side of system~\eqref{eq:special}
+is a discontinuous function with a finite number of first-order discontinuities (quantizers, dead zones, sign, or Heaviside).
+Furthermore, for the one-sided limit values of the function at the discontinuities,
+the relationship $g_i(\rho^+_k)>g_i(\rho^-_k)$ holds.
+Within this work such functions are considered to belong to the class~$\mathcal{G'}$.
+
+\smallskip
+\begin{definition}[Extended class of activation functions]\label{G_n}
+A mapping $g = (g_1,...,g_n)$ belongs to the class $\mathcal{G'}$ if and only if for all coordinate functions $g_i ~ (i \in 1:n)$ the following conditions are met:
+The function $g_i$ is piecewise continuous, that is, it is continuous at all points of $\mathbb{R}$ except for a countable number of discontinuity points $\{\rho_k\}$, where finite right- and left-hand limits exist (first-kind discontinuities) and $g_i(\rho^+_k)>g_i(\rho^-_k)$. Moreover, on any compact subset of $\mathbb{R}$, there is a finite number of such discontinuity points.
+\end{definition}
+\begin{remark}
+    It is important to note that, 
+    unlike~\cite{p1}, the functions $g_i$ here are not required to be monotonic and bounded.
+\end{remark}
+
+To define the solutions of system~\eqref{eq:special} with 
+a discontinuous right-hand side and $g\in\mathcal{G'}$,
+we employ A.~Filippov's theory~\cite{p2}.
+The concept of Filippov solutions is that the tangent vector
+to the trajectory of the solution, where it exists, should lie
+in the closure of the convex hull of the limiting values
+of the vector field $f(x(t))$ in arbitrarily small neighborhoods of the trajectory. 
+Thus, system \eqref{eq:special} becomes a system of \emph{differential inclusions}.
+
+\smallskip 
+\begin{definition}[solution to the Cauchy problem by Filippov]\label{fillipovsol}
+\textit{A solution to the Cauchy problem} for the system of differential equations \eqref{eq:special} on the interval $[t_0,t_1]$, where $t_0\leqslant t_1 \leqslant +\infty$, with the initial condition $x(t_0) = x_0$, is a vector-valued function $x(t)$ defined on $[t_0,t_1]$, which is absolutely continuous on this interval, satisfies the initial conditions, and almost everywhere on $[t_0,t_1]$ satisfies the differential inclusion:
+\[  
+    \dot x (t)\in \varphi\big(f(x(t))\big) = Bx(t)+T~\overline{\operatorname{conv}}\big[g(x(t))\big]+I,
+    \label{1.2}
+\]
+\[  
+    \varphi\big(f(x(t))\big)= \bigcap\limits_{\delta>0}\bigcap\limits_{\mu(\mathcal{N})=0}\overline{\operatorname{conv}}\big[f(\mathcal{B}(x(t),\delta) - \mathcal{N})\big], 
+\]
+where $\varphi\big(f(x(t))\big)$ is the smallest convex 
+closed set containing $f(x'(t))$, as $x'$ 
+varies over almost the entire $\delta$-neighborhood 
+of the point $x$ for a fixed $t$ and 
+$\overline{\operatorname{conv}}\{\cdot\}$ is a closure of the convex hull of the limit values at a point. 
+The above can be rewritten~\cite{p9} as:
+\begin{equation}\label{eq:special_conv}
+\begin{aligned}
+&\dot x (t)\in \varphi\big(f(x(t))\big) = \\
+	&=\overline{\operatorname{conv}}\big\{\lim f(x_i(t)) ~|~x_i(t) \to x(t),~x_i(t)\notin N_f\big\} = \\
+	&=Bx(t)+T~\overline{\operatorname{conv}}[g(x(t))]+I. 
+\end{aligned}
+\end{equation}
+
+ It is important to note that we exclude the null measure sets $N_f$,
+ where the function has a discontinuity.
+ This allows us to define trajectories at points where
+ the vector field is not defined.
+ Using Filippov's definition of solutions, we can also define the \emph{equilibrium point}
+ of system~\eqref{eq:special} as a stationary solution
+ of the differential inclusion on the semi-interval $[0,+\infty)$:
+ \begin{equation*} 0\in\varphi(e) =
+ Be+T~\overline{\operatorname{conv}}\big(g(e)\big)+I.
+ \end{equation*}    
+\end{definition}
+
+Now we define what is meant by an equilibrium point of the network and its global asymptotic stability in this theory~\cite{p1}.
+
+
+\begin{definition}[Equilibrium point]\label{equilib}
+An \textit{equilibrium point} $e\in \mathbb{R}^n$ of system \eqref{eq:special} is a constant solution $x(t)=e$ defined on $[0,+\infty)$ that satisfies the inclusion:
+\[      
+    0\in\varphi(e) = 
+    Be+T~\overline{\operatorname{conv}}\big(g(e)\big)+I.
+\]
+If $e$ is an \textit{equilibrium point}, then there exists a vector $\eta \in \overline{\operatorname{conv}}\big(g(e)\big)$ such that the following equality holds:
+\[ 0=Be+T\eta+I \tag{a.e.}.\]
+Hereafter, $\eta \in \mathbb{R}^n$ will be called the \textit{output equilibrium point} of the network.
+\end{definition}
+
+\begin{definition}[Global asymptotic stability]\label{gas_of_eq}
+An equilibrium point $e \in \mathbb{R}^n$ of network \eqref{eq:special} is \textit{globally asymptotically stable} if it is locally Lyapunov stable \cite{Lyapunov}, and for any $ x_0\in \mathbb{R}^n$, the solution $x(t)$ of system \eqref{eq:special} defined on $[0,+\infty)$ with initial data $x(0)=x_0$ converges to $e$ as $t \to +\infty$:
+
+   \[  \lim\limits_{t\to + \infty }x\big(t\big) = e.\]
+\end{definition}
+
+In the end of this section lets also give a definition of \textit{upper semicontinuous set-valued mapping}. This concept is later used to connect inclusion \eqref{eq:special_conv} with Filippov's theory. 
+
+\begin{definition}
+    Set-valued map $F(p)$ is called \textit{upper semicontinuous} in $p_0$, if for any open $V\subset\mathbb{R}^n$, $F(p_0)\subset V$, there exists a neighborhood $U(p_0)$ of $p_0$ such as:
+\[ 
+F(p) ~\subset ~ V, \quad \forall p\in U(p_0).
+\]
+\end{definition}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Stationary Sets and Gradient--Like Behavior}
+\label{subsec:YLG-terms}
+
+In this subsection we collect the basic notions from~\cite{YLG} that are
+used in the sequel.  Consider an autonomous differential inclusion
+\begin{equation}
+  \dot x(t) \in f(x(t)), \qquad x(t)\in\mathbb{R}^n,
+  \label{eq:aut-incl-prelim}
+\end{equation}
+with (Filippov) solutions defined on forward intervals $[t_0,+\infty)$.
+
+\begin{definition}[Distance to a set]
+For a nonempty set $\Lambda\subset\mathbb{R}^n$ and a point $x\in\mathbb{R}^n$
+we denote the distance from $x$ to $\Lambda$ by
+\[
+  p(x,\Lambda) := \inf_{y\in\Lambda} \|x-y\|.
+\]
+For a trajectory $t\mapsto x(t)$ we write
+$p[x(t),\Lambda] := p\bigl(x(t),\Lambda\bigr)$.
+\end{definition}
+
+\begin{definition}[Stationary vectors and stationary set {\cite[Def.~1.7]{YLG}}]
+A vector $c\in\mathbb{R}^n$ is called \emph{stationary} for
+system~\eqref{eq:aut-incl-prelim} if the constant function
+$x(t)\equiv c$ is a solution of~\eqref{eq:aut-incl-prelim}.
+The set of all stationary vectors is called the \emph{stationary set}
+of~\eqref{eq:aut-incl-prelim} and is denoted by
+\[
+  \Lambda := \{\,c\in\mathbb{R}^n \mid 0\in f(c)\,\}.
+\]
+\end{definition}
+
+\begin{definition}[Dichotomy and pointwise dichotomy {\cite[Defs.~1.8--1.9]{YLG}}]
+System~\eqref{eq:aut-incl-prelim} is called
+\emph{dichotomic} if every solution $x(t)$ which is bounded for $t>0$
+tends to the stationary set as $t\to+\infty$, that is,
+\[
+   \lim_{t\to+\infty} p[x(t),\Lambda] = 0
+   \quad\text{whenever } \sup_{t\ge 0}\|x(t)\|<\infty.
+\]
+It is called \emph{pointwise dichotomic} if every bounded solution
+tends to a (possibly solution–dependent) stationary vector,
+i.e., for any bounded solution there exists $c\in\Lambda$ such that
+\[
+   \lim_{t\to+\infty} x(t) = c.
+\]
+\end{definition}
+
+\begin{definition}[Gradient--like and quasi–gradient--like behavior
+{\cite[Defs.~1.10--1.11]{YLG}}]
+System~\eqref{eq:aut-incl-prelim} is called
+\emph{gradient–like} if for every solution $x(t)$ there exists an
+equilibrium $c\in\Lambda$ such that
+\[
+   \lim_{t\to+\infty} x(t) = c.
+\]
+It is called \emph{quasi–gradient–like} if every solution tends to the
+stationary set in the sense that
+\[
+   \lim_{t\to+\infty} p[x(t),\Lambda] = 0
+   \quad\text{for all solutions } x(\cdot).
+\]
+\end{definition}
+
+\begin{definition}[Lyapunov stability of a stationary set {\cite[Def.~1.12]{YLG}}]
+The stationary set $\Lambda$ of~\eqref{eq:aut-incl-prelim} is said to be
+\emph{Lyapunov stable} (stable in the small) if for every $\varepsilon>0$
+there exists $\delta>0$ such that for any solution $x(t)$ and any
+$t_0\in\mathbb{R}$, the condition
+$p[x(t_0),\Lambda]<\delta$ implies
+\[
+   p[x(t),\Lambda] < \varepsilon
+   \quad\text{for all } t\ge t_0.
+\]
+\end{definition}
+
+\begin{definition}[Global and pointwise global stability
+{\cite[Defs.~1.13--1.14]{YLG}}]
+A stationary set $\Lambda$ is called \emph{globally stable} if it is
+Lyapunov stable and system~\eqref{eq:aut-incl-prelim} is
+quasi–gradient–like.
+
+It is called \emph{pointwise globally stable} if it is globally stable
+and, in addition, every solution $x(t)$ converges to a stationary
+vector, i.e., for each solution there exists $c\in\Lambda$ such that
+\[
+   \lim_{t\to+\infty} x(t) = c.
+\]
+\end{definition}
+
+\begin{remark}
+When the stationary set $\Lambda$ consists of a single equilibrium
+$\{e\}$, pointwise global stability of $\Lambda$ is equivalent to the
+usual \emph{global asymptotic stability} of $e$ in the sense of
+Definition~\ref{gas_of_eq}.
+\end{remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Extended Nonlinearities in Lur'e Systems}
+\label{subsec:extended-nonlinearity}
+
+For Lur'e systems of the form
+\begin{equation}
+  \dot x(t) = P x(t) + q\,\xi(t), \quad
+     \xi(t) \in \varphi\bigl(\sigma(t),t\bigr),\ \
+     \sigma(t)=r^{*}x(t),
+  \label{eq:lure-extended}
+\end{equation}
+where \(x\in\mathbb{R}^n\), \(\sigma,\xi\in\mathbb{R}^m\),
+\(P\in\mathbb{R}^{n\times n}\), \(q\in\mathbb{R}^{n\times m}\),
+\(r\in\mathbb{R}^{n\times m}\), with a (possibly discontinuous) nonlinearity
+$\varphi \!:\!\mathbb{R}^m \! \times\mathbb{R}\rightrightarrows\mathbb{R}^m$,
+Yakubovich--Leonov--Gelig~\cite{YLG} use the notion of an \emph{extended
+nonlinearity}.
+
+\begin{definition}[Extended nonlinearity {\cite[Sec.~1.2]{YLG}}]
+A pair of functions $(x(\cdot),\xi(\cdot))$ defined on an interval
+$[t_0,t_1]$ is called a solution of the Lur'e system if
+\begin{itemize}
+  \item $x(t)$ is absolutely continuous and $\xi(t)$ is integrable;
+  \item the relations from \eqref{eq:lure-extended} 
+  hold for almost all $t\in[t_0,t_1]$.
+\end{itemize}
+The function $\xi(t)$ is then called an \emph{extended nonlinearity}
+associated with the (possibly multivalued) nonlinearity
+$\varphi(\sigma,t)$ along the trajectory $x(t)$.
+\end{definition}
+
+In the Hopfield-network setting, after Filippov convexification of the
+activation map $g$, the role of $\xi(t)$ will be played by a measurable
+\emph{extended activation} $\eta(t)\in\overline{\operatorname{conv}}\,g(x(t))$
+constructed via Makarov's measurable selection theorem; 
+see Theorem~\ref{thm:makarov} in Appendix~\ref{app:YLG} for details.
+
+% \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The HNN as a dynamical system}\label{subsec:HNN-dyn-sys}
+
+In the classical setting with continuous activations $g_i$, the
+Hopfield network is an ordinary differential
+equation \eqref{eq:special}, 
+% \[
+%    \dot x = -Bx + T g(x) + I, \qquad x\in\mathbb{R}^n,
+% \]
+and the Cauchy problem is well posed. For each $x_0\in\mathbb{R}^n$
+there exists a unique trajectory $t\mapsto x(t;x_0)$, and the maps
+$S_t:x_0\mapsto x(t;x_0)$, $t\ge0$, form a (single–valued) semiflow on
+$\mathbb{R}^n$ in the usual sense of dynamical systems theory.
+
+In the discontinuous case $g\in\mathcal{G'}$ we work with the Filippov
+inclusion~\eqref{eq:special_conv}. For brevity we denote the Filippov
+regularization of the right–hand side by
+\begin{equation}\label{eq:F-filippov}
+   F(x)
+   := \varphi\bigl(f(x)\bigr)
+   = Bx + T\,\overline{\operatorname{conv}}[g(x)] + I,
+   \qquad x\in\mathbb{R}^n.
+\end{equation}
+
+Filippov solutions are absolutely continuous functions $x(\cdot)$
+satisfying $\dot x(t)\in F(x(t))$ almost everywhere
+(Definition~\ref{fillipovsol}). In general, such solutions are not
+unique for a given initial state, and therefore \eqref{eq:special} no
+longer generates a single–valued semiflow. Nevertheless, it fits
+naturally into several generalized dynamical–systems frameworks.
+
+\smallskip
+\paragraph*{Set–valued dynamical system (multivalued semiflow)}
+For each $t\!\!\ge\!\!0$ and $x_0\!\in\!\mathbb{R}^n$ we define the reachable set
+at time $t$~by
+\begin{multline}\label{eq:Phi-t}
+   \Phi_t(x_0)
+   := \bigl\{\,x(t)\;\big|\;x(\cdot)\ \text{is a Filippov solution} \\ 
+   \text{of } \dot x\in F(x),\ x(0)=x_0 \bigr\}.
+\end{multline}
+Under the basic hypotheses of Filippov theory (upper semicontinuity of
+$F$, nonempty compact convex values, and linear growth), which are
+satisfied for~\eqref{eq:special_conv} in view of Assumptions~C1–C2, every initial condition admits at least one global
+solution on $[0,+\infty)$ and the family
+$\{\Phi_t\}_{t\ge0}$ enjoys the properties
+\begin{itemize}
+  \item $\Phi_0(x)=\{x\}$ for all $x\in\mathbb{R}^n$;
+  \item $\Phi_t(x)\neq\varnothing$ and $\Phi_t(x)$ is compact for all
+        $t\ge0$, $x\in\mathbb{R}^n$;
+  \item \emph{semigroup property}:
+        $\Phi_{t+s}(x)=\Phi_t\bigl(\Phi_s(x)\bigr)$
+        (composition of sets) for all $s,t\ge0$;
+  \item the map $x\mapsto\Phi_t(x)$ is upper semicontinuous for each
+        $t\ge0$.
+\end{itemize}
+In the terminology of differential inclusions
+(e.g.~\cite{Filippov1988,AubinCellina1984,BenaimHofbauerSorin2005}),
+$\{\Phi_t\}_{t\ge0}$ is an \emph{upper–semicontinuous multivalued
+semiflow}, or equivalently a \emph{set–valued dynamical system} on
+$\mathbb{R}^n$. All stability notions used in this paper (equilibria,
+global attractivity) are understood with respect to this multivalued
+evolution.
+
+\smallskip
+\paragraph*{Generalized semiflow viewpoint}
+An alternative but equivalent description is given by the notion of a
+\emph{generalized semiflow} in the sense of Ball~\cite{Ball1997}.  One
+considers the family $\mathcal{G}$ of all Filippov trajectories
+$x:\mathbb{R}_+\to\mathbb{R}^n$ of~\eqref{eq:special_conv} and checks
+that $\mathcal{G}$ is closed under time shifts and concatenation and is
+upper semicontinuous with respect to initial data.  Then
+$\mathcal{G}$ is a generalized semiflow on $\mathbb{R}^n$, and our main
+result can be rephrased as saying that, under Assumptions~C1–C3, the
+singleton stationary set $\{e\}$ is the global attractor of this
+generalized semiflow.
+
+\smallskip
+\paragraph*{Skew–product\,/\,cocycle representation}
+Finally, it is often convenient—especially in the YLG framework—to
+represent Filippov trajectories as solutions of an ordinary
+differential equation with a measurable ``extended activation''.
+By measurable–selection results due to Makarov and
+Yakubovich–Leonov–Gelig (see Theorem~\ref{thm:makarov} in Appendix~\ref{app:YLG} 
+for precise statements), for any Filippov solution $x(\cdot)$ there exists a
+measurable function
+$\eta:\mathbb{R}_+\to\mathbb{R}^n$ such that
+\[
+   \eta(t) \in \overline{\operatorname{conv}}[g(x(t))] \quad\text{a.e.},
+   \qquad
+   \dot x(t) = Bx(t) + T\eta(t) + I \quad\text{a.e.}
+\]
+Thus the HNN can be viewed as a control system
+\(
+   \dot x = Bx + T\eta + I
+\)
+driven by an admissible input $\eta(\cdot)$ taking values in the convex
+set $\overline{\operatorname{conv}}[g(x)]$.  If $\Omega$ denotes the
+space of admissible input functions endowed with the shift
+$\theta_t\omega(\cdot):=\omega(t+\cdot)$, then the pair
+$(\theta_t,\varphi)$, where $\varphi(t,\omega,x_0)$ is the set of
+solutions at time $t$ with input $\omega$ and initial state $x_0$, forms
+a (possibly multivalued) \emph{skew–product dynamical system} (or
+cocycle) over the base flow $(\Omega,\theta_t)$ in the standard sense
+of dynamical–systems and random–dynamical–systems theory (see e.g.~\cite{}).
+This representation connects the Filippov HNN with the Lur'e–type
+frequency–domain analysis used in the sequel, while the multivalued
+semiflow viewpoint above provides the natural setting for our global
+stability statements.
+
+\subsection{A YLG Theorem on Quasi-Gradient-Like Behavior and Pointwise Global Stability}
+\label{sec:ylg-theorem}
+
+The global-stability result proved later for discontinuous Hopfield neural
+networks relies on a Yakubovich--Leonov--Gelig theorem for systems with several
+discontinuous nonlinearities. Since the original statement is formulated in the
+frequency domain for a general Lur'e-type system, we recall here a faithful
+version in notation convenient for the sequel.
+
+Consider the system \eqref{eq:lure-extended}
+where each \(\varphi_i\) is piecewise
+single-valued. Let
+\begin{equation}
+  \chi(\lambda) := r^{*}(P-\lambda I)^{-1}q
+  \label{eq:ylg-transfer}
+\end{equation}
+be the transfer matrix of \eqref{eq:lure-extended}, and let
+\(\Lambda\) denote its stationary set.
+
+\begin{theorem}[Adapted form of {\cite[Theorem~3.1]{YLG}}]
+\label{thm:YLG-adapted-faithful}
+Assume that the following conditions hold.
+
+\begin{enumerate}
+\item[(i)]
+The transfer matrix \(\chi(\lambda)\) in \eqref{eq:ylg-transfer} is
+irreducible.
+
+\item[(ii)]
+There exist diagonal matrices
+\begin{multline*}
+  T=\diag(\tau_1,\dots,\tau_m)>0,\\
+  M=\diag(\mu_1,\dots,\mu_m)\ge 0,\\
+  \Theta=\diag(\vartheta_1,\dots,\vartheta_m),
+\end{multline*}   
+such that
+\begin{equation}
+  TM + \Re\!\bigl[(T+i\omega \Theta)\chi(i\omega)\bigr] \ge 0,
+  \qquad \forall\,\omega\in\mathbb{R},
+  \label{eq:ylg-freq-ineq}
+\end{equation}
+and
+\begin{equation}
+  \det(T+\lambda \Theta)\neq 0
+  \qquad
+  \text{whenever } \det(P-\lambda I)=0.
+  \label{eq:ylg-det-cond}
+\end{equation}
+
+\item[(iii)]
+For each \(i=1,\dots,m\), the nonlinearity \(\varphi_i\) satisfies
+\begin{equation}
+  (\sigma_i-\mu_i\xi_i)\,\xi_i \ge 0,
+  \qquad
+  \forall\,\xi_i\in\varphi_i(\sigma_i),
+  \label{eq:ylg-sector}
+\end{equation}
+\begin{equation}
+  \sigma_i \notin \mu_i\,\varphi_i(\sigma_i),
+  \qquad
+  \sigma_i\neq 0,
+  \label{eq:ylg-nondeg}
+\end{equation}
+and, in addition, whenever \(\mu_i\neq 0\) and \(\vartheta_i<0\),
+\begin{equation}
+  \int\limits_{0}^{\pm\infty}
+  \bigl|\lambda-\mu_i\varphi_i(\lambda)\bigr|\,d\lambda
+  =\infty.
+  \label{eq:ylg-integral}
+\end{equation}
+
+\item[(iv)]
+There exist numbers \(\mu_i^0>\mu_i\), \(i=1,\dots,m\), such that, with
+\[
+  M_0:=\diag(\mu_1^0,\dots,\mu_m^0),
+\]
+the matrix
+\begin{equation}
+  P + q M_0^{-1} r^{*}
+  \label{eq:ylg-hurwitz}
+\end{equation}
+is Hurwitz.
+
+\item[(v)]
+The stationary set \(\Lambda\) of \eqref{eq:lure-extended} is bounded.
+Moreover, if a solution \(x(t),\xi(t)\) of \eqref{eq:lure-extended}
+satisfies
+\begin{equation}
+  \xi_i(t)\sigma_i(t)\equiv 0,
+  \qquad i=1,\dots,m,
+  \label{eq:ylg-orthogonality}
+\end{equation}
+and
+\begin{equation}
+  x^{*}(t) H x(t)\equiv \mathrm{const}
+  \label{eq:ylg-quadratic-const}
+\end{equation}
+for all \(t\in\mathbb{R}\), where \(H\) is some positive definite matrix,
+then
+\[
+  x(t)\equiv x^0\in\mathbb{R}^n,\qquad
+  \xi(t)\equiv \xi^0\in\mathbb{R}^m,
+\]
+and
+\[
+  Px^0 + q\xi^0 = 0,
+\]
+that is, the solution is stationary.
+\end{enumerate}
+
+Then system \eqref{eq:lure-extended} is quasi-gradient-like.
+
+Assume, in addition, that:
+
+\begin{enumerate}
+\item[(vi)]
+There exists \(\varepsilon>0\) such that if \(\rho(x,\Lambda)<\varepsilon\),
+then for any stationary solution \(x^0,\xi^0\) the inequalities
+\begin{equation}
+  (\xi_i-\xi_i^0)
+  \bigl[\sigma_i-\sigma_i^0-\mu_i(\xi_i-\xi_i^0)\bigr]\ge 0,
+  \qquad
+  \forall\,\xi_i\in\varphi_i(\sigma_i),
+  \label{eq:ylg-local-mono}
+\end{equation}
+hold for \(i=1,\dots,m\), where \(\sigma_i\) and \(\sigma_i^0\) are the
+\(i\)th components of \(r^{*}x\) and \(r^{*}x^0\), respectively.
+In the case \(\vartheta_i<0\), the bracketed term in
+\eqref{eq:ylg-local-mono} is additionally assumed to be nonzero whenever
+\(\xi_i\neq \xi_i^0\) and \(x\neq x^0\).
+\end{enumerate}
+
+Then the stationary set \(\Lambda\) of
+\eqref{eq:lure-extended} is pointwise globally stable.
+\end{theorem}
+
+\begin{remark}
+Theorem~\ref{thm:YLG-adapted-faithful} is stated in the original
+frequency-domain Lur'e notation because the conditions
+\eqref{eq:ylg-freq-ineq}--\eqref{eq:ylg-hurwitz} are most naturally expressed
+through the transfer matrix \(\chi(\lambda)\). In the Hopfield setting studied
+below, the theorem is applied after rewriting the discontinuous HNN in a
+compatible Lur'e form and identifying the corresponding matrices
+\(P\), \(q\), \(r\), and nonlinearities \(\varphi_i\).
+\end{remark}
+
+\begin{corollary}
+\label{cor:YLG-singleton}
+If, under the assumptions of
+Theorem~\ref{thm:YLG-adapted-faithful}, the stationary set is a singleton,
+\[
+  \Lambda=\{x'\},
+\]
+then \(x'\) is a globally asymptotically stable equilibrium of
+\eqref{eq:lure-extended}.
+\end{corollary}
+
+\begin{remark}
+Corollary~\ref{cor:YLG-singleton} is the form used later in the proof of the
+main global-stability theorem for discontinuous Hopfield neural networks:
+once Assumptions~\textbf{C1--C3} are verified and the stationary set is shown to consist
+of a single point, global asymptotic stability follows by direct invocation of
+Theorem~\ref{thm:YLG-adapted-faithful}.
+\end{remark}
+
+\section{Problem Statement and Assumptions}\label{sec:problem}
+
+Consider the Hopfield neural network (HNN) in the form \eqref{eq:special}, where $g(x)=(g_1(x_1),\ldots,g_n(x_n))^*$ is the componentwise activation
+mapping, each $g_i:\mathbb{R}\to\mathbb{R}$ possibly discontinuous.
+
+Throughout the paper we assume that $g$ belongs to the extended class
+$\mathcal G'$ of activation functions (Definition~1), so that every
+coordinate $g_i$ is piecewise continuous with a finite number of
+first–kind discontinuities on any compact set, admits one–sided limits
+at the discontinuity points, and is sign–preserving and
+nondecreasing.  In particular, its Filippov convexification
+$\mathrm{conv}\,g_i$ is a monotone, piecewise single–valued
+multifunction in the sense of YLG.
+
+\begin{assumption1}[\bf Linear growth]\label{ass:C1}
+For each $i\in\{1,\dots,n\}$ there exist constants $a_i,b_i\ge 0$ such
+that
+\[
+  |g_i(\xi)| \le a_i|\xi| + b_i,
+  \qquad \forall\,\xi\in\mathbb{R}.
+\]
+\end{assumption1}
+
+\begin{assumption2}[\bf One-sided Lipschitz (componentwise)]\label{ass:C2}
+For each $i\in\{1,\dots,n\}$ there exists $C_i\in\mathbb{R}$ such that
+for all $x,y\in\mathbb{R}^n$ and for all a.e.\ selections
+$\eta\in\mathrm{conv}\,g(x)$, $\zeta\in\mathrm{conv}\,g(y)$ one has
+\[
+  (\eta_i - \zeta_i)\,(x_i - y_i)
+  \;\le\; C_i\,(x_i - y_i)^2.
+\]
+\end{assumption2}
+
+\begin{remark}
+Assumption~\textbf{C2} is also known as a \emph{unilateral
+Lipschitz-like} condition and, together with the linear growth
+condition~\textbf{C1}, it is used in a similar way in several works
+on Hopfield-type networks with discontinuous activations,
+see e.g.\ \cite{periodic_time_varying,eq_ref_11,unilateral_Lipschitz_like_condition,
+GAS_of_delayed,GAS_discrete_time_varying}.
+\end{remark}
+
+\subsection*{Lur\'e representation and transfer matrix}
+
+For the purposes of applying the YLG theory we write
+\eqref{eq:special} in the standard Lur\'e form \eqref{eq:lure-extended} with
+\begin{equation}\label{eq:Pqr-def}
+  P := -B,\qquad
+  q := T,\qquad
+  r := I_n,
+\end{equation}
+and the extended nonlinearity
+\[
+  \varphi(\sigma)
+  := \overline{\mathrm{conv}}\,g(\sigma)
+  = \bigl(\overline{\mathrm{conv}}\,g_1(\sigma_1),\dots,
+          \overline{\mathrm{conv}}\,g_n(\sigma_n)\bigr)^* .
+\]
+The transfer matrix of the linear part is
+\begin{equation}\label{eq:transfer-X}
+  X(\lambda) 
+  := r^{*}(P-\lambda I)^{-1}q
+  = (-B-\lambda I)^{-1}T,
+  \qquad \lambda\in\mathbb{C}.
+\end{equation}
+
+% ------------------------------------------------
+% Main third assumption: frequency-domain condition
+% ------------------------------------------------
+\begin{assumption3}[\bf YLG-type frequency condition]\label{ass:C3prime}
+The transfer matrix $X(\lambda)$ in \eqref{eq:transfer-X} is
+irreducible in the sense of Definition~2.6 in Chapter~2 of YLG
+(i.e.\ the pair $(P,r)=(-B,I_n)$ is observable), and there exist
+diagonal matrices
+\begin{multline*}   
+   \mathcal{T}=\mathrm{diag}(\tau_1,\dots,\tau_n)\succ 0,\\
+   \mathcal{M}=\mathrm{diag}(\mu_1,\dots,\mu_n)\succeq 0,\\
+   \Theta=\mathrm{diag}(\vartheta_1,\dots,\vartheta_n)
+\end{multline*}
+such that
+\begin{equation}\label{eq:C3prime-freq}
+   \mathcal{T}\mathcal{M}
+   + \operatorname{Re}\Bigl[
+        \bigl(\mathcal{T} + i\omega \Theta\bigr)\,
+        X(i\omega)
+      \Bigr]
+   \succeq 0,
+   \qquad \forall\,\omega\in\mathbb{R},
+\end{equation}
+and
+=
+\begin{multline}\label{eq:C3prime-det}
+    \det\bigl(\mathcal{T} + \lambda \Theta\bigr) \neq 0 \\ 
+  \quad\text{whenever}\quad 
+  \det(P-\lambda I)=\det(-B-\lambda I)=0.
+\end{multline}
+\end{assumption3}
+
+Assumption~\textbf{C3} is exactly the frequency-domain hypothesis
+\textup{(i)}–\textup{(ii)} of Theorem~3.1 in Chapter~3 of YLG,
+specialized to the triple $(P,q,r)=(-B,T,I_n)$ of the Hopfield model.
+
+% ------------------------------------------------
+% Alternative algebraic formulation (derived from C3)
+% ------------------------------------------------
+
+\begin{assumption3mat}[\bf Diagonal Lyapunov stability (DLS)]\label{ass:C3}
+There exists a diagonal matrix $H=\mathrm{diag}(h_1,\dots,h_n)\succ 0$
+and a constant $\alpha\ge 0$ such that
+\begin{equation}\label{eq:C3-matrix}
+  -HB - B^{*}H + \alpha\bigl(T^{*}H + HT\bigr) \prec 0 .
+\end{equation}
+\end{assumption3mat}
+
+Assumption~\textbf{C3$'$} will be used only as a derived, purely
+state–space condition.  It can be taken as an alternative to
+\textbf{C3} if one prefers to avoid frequency-domain inequalities (see Section \ref{sec:nonunique} and Appendix \ref{app:proofs}).
+For our main results, however, we assume \textbf{C1}, \textbf{C2},
+\textbf{C3} and $g\in\mathcal G'$; the next lemma shows that
+\textbf{C3$'$} then follows automatically.
+
+\begin{lemma}[C3 implies C3$'$]\label{lem:C3prime-implies-C3}
+Suppose that Assumption~\textbf{C3} holds. Then there exist a
+diagonal matrix $H=\mathrm{diag}(h_1,\dots,h_n)\succ 0$ and a constant
+$\alpha>0$ such that the matrix inequality~\eqref{eq:C3-matrix} is
+satisfied; in particular, Assumption~\textbf{C3$'$} holds.
+\end{lemma}
+
+\begin{proof}
+Under Assumption~\textbf{C3}, conditions \textup{(i)}–\textup{(ii)}
+of Theorem~3.1 in Chapter~3 of YLG are satisfied for the system
+\eqref{eq:lure-extended} with $(P,q,r)=(-B,T,I_n)$.  By the frequency
+criterion in YLG (see Eqns.~(3.10)–(3.11) on pp.~114–115), there
+exists a symmetric matrix $H_{\mathrm{YLG}}=H_{\mathrm{YLG}}^{*}$
+such that the quadratic form
+\[
+  W(x,\xi)
+  := \bigl[2x^{*}H_{\mathrm{YLG}} + \xi^{*}\Theta r^{*}\bigr]\,
+     (P x + q\xi)
+     + \xi^{*}\mathcal{T}\,(r^{*}x - \mathcal{M}\xi)
+\]
+satisfies
+\begin{equation}\label{eq:W-leq0}
+  W(x,\xi) \le 0,
+  \qquad \forall\,x\in\mathbb{R}^n,\ \forall\,\xi\in\mathbb{R}^n.
+\end{equation}
+Moreover, by Eq.~(3.14) on p.~115 of YLG one can choose
+$H_{\mathrm{YLG}}$ positive definite:
+\begin{equation}\label{eq:H-YLG-pd}
+  H_{\mathrm{YLG}} \succ 0 .
+\end{equation}
+
+Set $\xi\equiv 0$ in the definition of $W$ and use $r^{*}=I_n$ and
+$P=-B$:
+\begin{multline*}
+  W(x,0)
+   = \bigl[2x^{*}H_{\mathrm{YLG}}\bigr]\,(P x)
+   = 2x^{*}H_{\mathrm{YLG}}P x = \\
+   = -2x^{*}H_{\mathrm{YLG}}B x .    
+\end{multline*}
+Together with \eqref{eq:W-leq0}, this gives
+\begin{equation}\label{eq:HB-negative}
+  -2x^{*}H_{\mathrm{YLG}}B x \le 0,
+  \qquad \forall\,x\in\mathbb{R}^n.
+\end{equation}
+Since $B=\mathrm{diag}(b_1,\dots,b_n)\succ 0$ and
+$H_{\mathrm{YLG}}\succ 0$, we have $x^{*}H_{\mathrm{YLG}}Bx>0$ for
+all $x\neq 0$.  Hence \eqref{eq:HB-negative} is in fact strict for
+$x\neq0$, and the symmetric matrix
+\[
+  S_{\mathrm{YLG}}
+  := -H_{\mathrm{YLG}}B - B^{*}H_{\mathrm{YLG}}
+\]
+is negative definite:
+\begin{equation}\label{eq:SYLG-negative}
+  x^{*}S_{\mathrm{YLG}}x
+  = -2x^{*}H_{\mathrm{YLG}}B x < 0,
+  \qquad \forall\,x\neq 0 .
+\end{equation}
+
+Define the diagonal matrix
+\begin{equation}\label{eq:H-diag-def}
+  H := \mathrm{diag}\bigl((H_{\mathrm{YLG}})_{11},
+                         \dots,
+                         (H_{\mathrm{YLG}})_{nn}\bigr).
+\end{equation}
+By \eqref{eq:H-YLG-pd}, all diagonal entries $(H_{\mathrm{YLG}})_{ii}$
+are strictly positive, so $H\succ 0$.  Since $B$ is diagonal and
+positive definite, for every $x\neq 0$ we have
+\begin{align*}
+  x^{*}\bigl(-HB - B^{*}H\bigr) x
+    &= -2x^{*}HBx \\
+    &= -2(B^{1/2}x)^{*}\bigl(B^{1/2}HB^{1/2}\bigr)(B^{1/2}x) \\
+    &< 0,
+\end{align*}
+because $B^{1/2}HB^{1/2}\succ 0$.  Thus
+\begin{equation}\label{eq:S0-negative}
+  S_0 := -HB - B^{*}H \prec 0 .
+\end{equation}
+
+Let
+\[
+  S_1 := T^{*}H + HT
+\]
+and consider the one-parameter family of symmetric matrices
+\[
+  S(\alpha) := S_0 + \alpha S_1,
+  \qquad \alpha\ge 0.
+\]
+The eigenvalues of $S(\alpha)$ depend continuously on $\alpha$, and
+$S(0)=S_0\prec 0$ by \eqref{eq:S0-negative}.  Hence there exists
+$\alpha'>0$ such that $S(\alpha)\prec 0$ for all
+$\alpha\in[0,\alpha']$.  Choosing any
+$\alpha\in(0,\alpha']$, we obtain
+\[
+  -HB - B^{*}H + \alpha\bigl(T^{*}H + HT\bigr)
+  = S(\alpha) \prec 0 ,
+\]
+which is precisely~\eqref{eq:C3-matrix}.  This proves
+Assumption~\textbf{C3$'$}.
+\end{proof}
+% ================================================================
+% Main results
+% ================================================================
+\section{Main Results}\label{sec:main}
+
+The Hopfield network considered in Section~\ref{sec:problem} can be rewritten
+in the Lur'e form \eqref{eq:lure-extended} after identifying the state,
+the static discontinuous activation map, and the corresponding interconnection
+operators. The main task in the proof of the theorem below is therefore to
+verify conditions~(i)--(vi) of Theorem~\ref{thm:YLG-adapted-faithful} under
+Assumptions~\textbf{C1--C3} and to prove that the associated stationary set is a
+singleton. Once this is done, global asymptotic stability follows from
+Corollary~\ref{cor:YLG-singleton}.
+
+\begin{theorem}[Global asymptotic stability of a Hopfield network with discontinuous activations]\label{thm:main}
+Consider the continuous–time Hopfield neural network as in \eqref{eq:special}
+\begin{equation*}
+  \dot x(t) = -B x(t) + T\,g(x(t)) + I, \qquad x(t)\in\mathbb{R}^n,
+\end{equation*}
+where
+\begin{itemize}
+  \item $B = \mathrm{diag}(b_1,\dots,b_n)\succ 0$ is a diagonal matrix
+        of leak rates;
+  \item $T\in\mathbb{R}^{n\times n}$ is the interconnection (synaptic) matrix;
+  \item $I\in\mathbb{R}^n$ is a constant input vector;
+  \item $g=(g_1,\dots,g_n)^{*}:\mathbb{R}^n\to\mathbb{R}^n$ is the
+        componentwise activation mapping, each
+        $g_i:\mathbb{R}\to\mathbb{R}$ possibly discontinuous.
+\end{itemize}
+Assume that $g$ belongs to the extended class $\mathcal{G}'$ of
+activation functions (Definition~1) and that Assumptions
+\textbf{C1}–\textbf{C3} hold.
+
+Interpret system~\eqref{eq:special} in the sense of Filippov, i.e.\
+as the differential inclusion \eqref{eq:special_conv}
+\begin{equation*}
+   \dot x(t) \in -B x(t) + T\,\varphi(x(t)) + I,
+   \qquad \varphi(x) = \overline{\mathrm{conv}}\,g(x).
+\end{equation*}
+
+Then the following properties hold.
+\begin{enumerate}
+  \item For every initial condition $x(0)=x_0\in\mathbb{R}^n$ there
+        exists at least one Filippov solution $x(\cdot;x_0)$
+        of~\eqref{eq:special} defined on the whole half–line
+        $[0,+\infty)$.
+
+  \item There exists a unique equilibrium point $e\in\mathbb{R}^n$,
+        i.e.\ a constant vector satisfying
+        \[
+           0 \in -B e + T\,\mathrm{conv}\,g(e) + I .
+        \]
+
+  \item This equilibrium is \emph{globally asymptotically stable in
+        the sense of Filippov}: for every Filippov solution
+        $x(\cdot;x_0)$ of~\eqref{eq:special} one has
+        \[
+           \lim_{t\to+\infty} x(t;x_0) = e ,
+        \]
+        and for every $\varepsilon>0$ there exists $\delta>0$ such
+        that $|x_0-e|<\delta$ implies $|x(t;x_0)-e|<\varepsilon$ for
+        all $t\ge0$.
+\end{enumerate}
+\end{theorem}
+
+We treat the Hopfield network as a concrete Lur\'e–type system and
+embed it into the YLG framework.  The argument proceeds in four main
+steps:
+\begin{enumerate}
+  \item we establish global existence of Filippov solutions;
+  \item we prove existence and uniqueness of an equilibrium;
+  \item we rewrite the HNN explicitly in the Lur\'e form used by YLG;
+  \item we verify that Assumptions~\textbf{C1}, \textbf{C2},
+        \textbf{C3} and $g\in\mathcal G'$ imply all hypotheses of
+        Theorem~3.1 in Chapter~3 of YLG, and then invoke that theorem
+        to conclude global asymptotic stability of the equilibrium.
+\end{enumerate}
+
+\subsection{Global Existence of Filippov Solutions for the HNN}
+
+In this subsection we show that under Assumption~\textbf{C1} every
+Filippov solution of the Hopfield network exists on the entire
+half–line $[0,+\infty)$.
+
+Interpreting \eqref{eq:special} in the sense of Filippov, we obtain
+the differential inclusion \eqref{eq:special_conv}.
+
+\begin{proposition}[Global existence]
+\label{prop:global-existence}
+Suppose that Assumption~C1 (linear growth of the activation functions)
+holds. Then, for every initial condition $x(0)=x_0\in\mathbb{R}^n$,
+there exists at least one Filippov solution $x(\cdot;x_0)$
+of~\eqref{eq:special_conv} defined on the whole half–line $[0,+\infty)$.
+\end{proposition}
+
+\begin{proof}
+\emph{Step 1 (local existence).}
+Fix $t_0\in[0,+\infty)$ and $a\in\mathbb{R}^n$, and consider the
+cylinder
+\[
+    D := \{(x,t)\in\mathbb{R}^n\times\mathbb{R} \mid
+           |t-t_0|\le\alpha,\ |x-a|\le\rho\},
+\]
+with some $\alpha>0$, $\rho>0$.
+Since $g$ is piecewise continuous with a finite number of first–order
+discontinuities on any compact set (Definition~1) and $\varphi$ is its
+Filippov convexification, the multifunction
+\[
+   f(x,t) := -B x + T\,\varphi(x) + I
+\]
+is upper semicontinuous in $(x,t)$ and has nonempty, closed, bounded
+and convex values (see, e.g.,~\cite[Ch.~1]{YLG}).
+On the compact set $D$ the values of $f$ are uniformly bounded by some
+constant $c>0$.
+
+Therefore, the hypotheses of the local existence theorem for
+differential inclusions (Theorem~1.1 in~\cite[Ch.~1]{YLG}) are
+satisfied, and for any initial condition $x(t_0)=a$ there exists at
+least one absolutely continuous solution of~\eqref{eq:special_conv} on
+the interval $|t-t_0|\le\tau$, where
+$\tau = \min\{\alpha,\rho/c\}$. Hence Filippov solutions of
+\eqref{eq:special_conv} exist locally.
+
+\emph{Step 2 (global growth estimate from \textbf{C1}).}
+Assumption~\textbf{C1} states that for each scalar activation $g_i$ there exist
+constants $a_i,b_i\ge0$ such that
+\[
+   |g_i(\xi)| \le a_i|\xi| + b_i, \qquad \forall\,\xi\in\mathbb{R}.
+\]
+It follows that there are constants $A,B\ge0$ with
+\[
+   \|\eta\| \le A\|x\| + B,
+   \qquad \forall\,\eta\in\varphi(x),\ \forall x\in\mathbb{R}^n.
+\]
+For instance, one may take
+$A \!\!:=\!\! \max_i a_i \sqrt{n}$ and
+$B \!\!:=\!\! \sqrt{\sum_i b_i^2}$.
+For any $\xi\in f(x,t)$ we can write
+$\xi = -B x + T\eta + I$ with some $\eta\in\varphi(x)$, hence
+\[
+\begin{aligned}
+   \|\xi\|
+   &\le \|B\|\,\|x\| + \|T\|\,\|\eta\| + \|I\| \\
+   &\le \|B\|\,\|x\| + \|T\|(A\|x\|+B) + \|I\| \\
+   &= \bigl(\|B\| + A\|T\|\bigr)\,\|x\|
+      + \bigl(\|T\|B + \|I\|\bigr).
+\end{aligned}
+\]
+Thus there exist constants $K_1>0$, $K_0>0$ such that
+\begin{equation}
+   \|\xi\| \le K_1 \|x\| + K_0,
+   \qquad \forall\,\xi\in f(x,t),\ \forall x\in\mathbb{R}^n,\ t\ge0.
+   \label{eq:growth-estimate}
+\end{equation}
+Define
+\[
+   L(r) := K_1 r + K_0, \qquad r\ge0.
+\]
+Then $L$ is positive and continuous, and
+\eqref{eq:growth-estimate} yields
+\[
+   \|\xi\| \le L(\|x\|),
+   \qquad \forall\,\xi\in f(x,t),\ \forall x,t.
+\]
+Moreover,
+\[
+   \int\limits_0^{+\infty} \!\!\!\! \frac{dr}{L(r)}
+   = \int\limits_0^{+\infty}\!\!\!\!\!\! \frac{dr}{K_1 r + K_0}
+   = \frac{1}{K_1} \bigl[\ln(K_1 r + K_0)\bigr]_{0}^{+\infty}
+   \! = \! +\infty.
+\]
+
+\emph{Step 3 (Wintner–type continuation).}
+The conditions of the Wintner–type continuation theorem for
+differential inclusions (Theorem~1.3 in~\cite[Ch.~1]{YLG}) are now
+satisfied: the right–hand side $f(x,t)$ is defined for all
+$(x,t)\in\mathbb{R}^n\times(0,+\infty)$, and it obeys the growth
+estimate $|\xi|\le L(|x|)$ with a positive continuous function $L$
+such that $\int\limits_0^{+\infty}dr/L(r)=+\infty$.
+Therefore, every solution of~\eqref{eq:special_conv} can be continued to
+all $t>0$; no solution can blow up in finite time.
+
+Combining local existence (Step~1) with this continuation property
+(Step~3), we conclude that for every initial state $x_0$ there exists
+at least one Filippov solution $x(\cdot;x_0)$ of~\eqref{eq:special_conv}
+defined on the entire half–line $[0,+\infty)$.
+\end{proof}
+
+\subsection{Existence and Uniqueness of Equilibrium}
+Suppose $x^{(1)}\neq x^{(2)}$ are two equilibria; pick selections
+$\xi^{(k)}\in\varphi\bigl(x^{(k)}\bigr)$ and denote
+$\Delta x=x^{(1)}-x^{(2)}$, $\Delta\xi=\xi^{(1)}-\xi^{(2)}$.  
+% Let
+% $x^{(k)},\xi^{(k)}$ ($k=1,2$) be two equilibria.  
+Subtracting yields
+$(B\Delta x+T\Delta\xi)=0$ with $\Delta x\neq0$.  
+Premultiply by
+$\Delta x^{\!*}\alpha$ and take absolute values:
+\begin{equation}\label{eq:uniq}
+\begin{aligned}
+    b_{\min}\|\Delta x\|^{2}
+  &\leqslant \sum_{i}\alpha_i b_i|\Delta x_i|^{2}
+  = |\Delta x^{\!*}\alpha T\Delta\xi| \leqslant \\
+  &
+  \leqslant \|T^{\!*}\alpha\|_{2}\,\|\Delta x\|\,\|\Delta\xi\|.
+\end{aligned}
+\end{equation}
+\textbf{C2} implies $|\Delta\xi_i|\leqslant C_i|\Delta x_i|$, so
+\(\|\Delta\xi\|\leqslant C_{\max}\|\Delta x\|\) with $C_{\max}:=\max_i C_i$.
+Using $\|T^{\!*}\alpha\|_{2}\leqslant \|M\|_{2}/2$ (spectral norm sub‑additivity)
+we get
+\[
+  b_{\min}\|\Delta x\|\leqslant \tfrac{\|M\|_{2}}{2}C_{\max}\|\Delta x\|,
+\]
+contradicting the inequality embedded in \textbf{C3$'$} (and, thus, \textbf{C3}). 
+Therefore $\Delta x~=~0$ and
+uniqueness holds.
+
+Now, similarly to \cite{p1}, we will perform a change of variables to translate $e$ into the origin. Let $e$ be an equilibrium point of the set-valued mapping $\varphi(x(t))$, i.e., by Definition \ref{equilib}:
+\[
+0 \in \varphi(e)=Be+T~\overline{\operatorname{conv}}(g(e))+I ,
+\]
+and let $\eta' \in \overline{\operatorname{conv}}(g(e))$ be the corresponding equilibrium point of the neural network's output, such that the following equality holds
+\begin{equation}\label{eq:outputequilib}
+    \begin{aligned}
+0 &= Be + T \eta'+ I,\\
+T \eta' &= -(Be+I)
+    \end{aligned}
+\end{equation}
+
+\begin{remark}
+{The existence of $\eta'$ can be established using reasoning analogous to that in the proof of Theorem \ref{exists}, 
+i.e., by Makarov’s theorem \cite[p. 38, Th. 1.7]{Leonov}, for any solution $x(t)$, 
+there exists an a.e. measurable bounded mapping $\eta(t) \in \overline{\operatorname{conv}}g(x(t))$ such that the equality in the inclusion holds.}
+\end{remark}
+
+Thus, $e$ is an equilibrium point of the neural network \eqref{eq:special} (since there is $\eta'$ corresponding to it). 
+Next we perform a change of variables $z=x-e$ to shift the equilibrium point to the origin and transform system \eqref{eq:special_conv} from definition \ref{fillipovsol} into system:
+\[
+\begin{aligned}
+    \dot z(t) &\in Bz+ T~ \overline{\operatorname{conv}}(g(z+e))+Be+I\overset{\eqref{eq:outputequilib}}{=}\\
+    &= Bz+T~ \overline{\operatorname{conv}}(g(z+e)) - T\eta'.\\
+\end{aligned}
+\]
+Henceforth, we consider system \eqref{sys:origin}:
+\begin{equation}\label{sys:origin}
+\dot z(t) \in Bz+T~ \overline{\operatorname{conv}}(G(z)),
+\end{equation}
+where $G(z)=g(z+e)-\eta'$. Note that all the properties of $g$ also hold for $G$.
+
+\begin{enumerate}
+    \item $G\in \mathcal{G'}$ (see Definition \ref{G_n});
+    
+    \item Since $\overline{\operatorname{conv}}(G(0))=\overline{\operatorname{conv}}(g(e)) -\eta'$, and $\eta' \in \overline{\operatorname{conv}}(g(e))$, 
+    
+    it follows that $0 \in \overline{\operatorname{conv}}(G(0))$. Thus, by Definition \ref{equilib}, the origin is an equilibrium point of system \eqref{sys:origin};
+    \item $ \frac{ \widetilde{\eta_i}}{z} \leqslant C_i $, $\forall x \ne 0, \quad \forall \widetilde{\eta_i} \in  \overline{\operatorname{conv}}[G_i(z)]$ (a consequence of condition \textbf{C2}).
+\end{enumerate}
+% From now on we will write the system \eqref{eq:special_conv} of differential inclusions in the form of \eqref{sys:origin} but using symbols from \eqref{eq:special} and keeping in mind that it is indeed a system with origin as an equilibrium point:
+% \begin{equation}\label{eq:special_origin}
+% \dot x(t) = Bx+Tg(x),
+% \end{equation}
+
+\subsection{HNN as a Differential Inclusion in the Lur'e Form}
+
+After shifting the equilibrium $e$ to the origin (via $z=x-e$) and
+renaming $z$ back to $x$, the network is written as the Filippov
+differential inclusion
+\begin{equation}\label{eq:HNN-shifted}
+      \dot x(t)\in P x(t)+q\,\varphi(x(t)), \qquad x(t)\in\mathbb R^n,
+\end{equation}
+with $P=-B$, $q=T$, $r^{*}=I_n$ and $\varphi=\overline{\mathrm{conv}}\,g$ as
+in~\eqref{eq:lure-extended}.  In the notation of YLG this is exactly a
+Lur\'e system of the form (3.1):
+\[
+  \dot x = P x + q\,\xi,\qquad
+  \sigma = r^{*} x,\qquad
+  \xi \in \varphi(\sigma),
+\]
+with several piecewise single-valued nonlinearities $\varphi_i$.
+
+The detailed derivation of \eqref{eq:HNN-shifted} and the discussion
+of the class $\mathcal G'$ in the current draft remain valid and are
+not repeated here.
+
+\subsection{YLG Lyapunov Functional and Global Asymptotic Stability}
+\label{subsec:YLG-main}
+
+We now show how Assumptions~\textbf{C1}, \textbf{C2},
+\textbf{C3} and $g\in\mathcal G'$ guarantee that the Lur\'e system
+\eqref{eq:HNN-shifted} satisfies all hypotheses of Theorem~3.1 in
+Chapter~3 of YLG \ref{thm:YLG-adapted-faithful} and therefore has a pointwise globally stable
+stationary set.  Since we already know that the equilibrium is unique,
+this yields global asymptotic stability of the Hopfield network.
+
+\medskip
+\noindent
+\textbf{Verification of the YLG hypotheses.}
+
+\begin{lemma}\label{lem:YLG-conditions}
+Let $g\in\mathcal G'$ and suppose that Assumptions~\textbf{C1},
+\textbf{C2} and~\textbf{C3} hold.  Then, when the Hopfield network
+is written in the Lur\'e form \eqref{eq:HNN-shifted} with
+$(P,q,r)=(-B,T,I_n)$ and $\varphi=\mathrm{conv}\,g$, all hypotheses
+\textup{(i)}–\textup{(vi)} of Theorem~3.1 are satisfied.
+\end{lemma}
+
+\begin{proof}
+We check the six items one by one.
+
+\smallskip\noindent
+\textit{(i) and (ii).}
+By construction of the transfer matrix $X(\lambda)$
+in~\eqref{eq:transfer-X}, Assumption~\textbf{C3} states precisely
+that $X(\lambda)$ is irreducible and that there exist diagonal
+matrices $\mathcal T$, $\mathcal M$, $\Theta$ such that the frequency
+inequality \eqref{eq:C3prime-freq} and the nondegeneracy condition
+\eqref{eq:C3prime-det} hold.  Thus the hypotheses (i) and (ii) of
+Theorem~3.1 are fulfilled, with $T=\mathcal T$,
+$M=\mathcal M$, $\theta=\Theta$ and $m=n$.
+
+\smallskip\noindent
+\textit{(iii).}
+By Definition~1, each $g_i$ in the class $\mathcal G'$ is piecewise
+continuous, sign–preserving and nondecreasing, with a finite number
+of first–kind discontinuities on any compact interval and strict
+upward jumps at the discontinuity points.  Its Filippov
+convexification $\varphi_i=\mathrm{conv}\,g_i$ is therefore a
+monotone, piecewise single–valued multifunction whose graph has no
+horizontal segments at nonzero $\sigma_i$.  In particular,
+$\sigma_i\,\xi_i\ge 0$ for all $\xi_i\in\varphi_i(\sigma_i)$.
+
+Choose $\mu_i:=0$ for all $i$.  Then the sector inequality \eqref{eq:ylg-sector} of
+Theorem~3.1 reduces to
+\[
+  (\sigma_i - \mu_i\xi_i)\,\xi_i
+  = \sigma_i \xi_i \ge 0,
+  \qquad \xi_i\in\varphi_i(\sigma_i),
+\]
+which holds by the sign–preserving property of $\mathcal G'$.  The
+nondegeneracy condition \eqref{eq:ylg-nondeg} becomes
+$\sigma_i\notin \mu_i\varphi_i(\sigma_i)$ for $\sigma_i\neq 0$, which
+is trivially true when $\mu_i=0$.  Finally, the additional integral
+condition \eqref{eq:ylg-integral} of Theorem~3.1 is required only for indices with
+$\mu_i\neq0$ and $\vartheta_i<0$, so it is vacuous when
+$\mu_i=0$.  Hence item (iii) is satisfied.
+
+\smallskip\noindent
+\textit{(iv).}
+Condition (iv) requires the existence of constants
+$\mu_i^0>\mu_i$ such that the matrix
+\[
+  P + qM_0^{-1}r^{*}
+  = -B + T M_0^{-1},\qquad
+  M_0:=\mathrm{diag}(\mu_1^0,\dots,\mu_n^0),
+\]
+is Hurwitz.  Since $B=\mathrm{diag}(b_i)\succ0$ and $T$ is fixed, we
+can choose $\mu_i^0$ sufficiently large so that, for every row $k$,
+\[
+  b_k
+  > \sum_{j=1}^n \frac{|T_{kj}|}{\mu_j^0}.
+\]
+Equivalently, the Gershgorin discs of $-B+T M_0^{-1}$ lie strictly in
+the open left half–plane, which implies that $-B+T M_0^{-1}$ is
+Hurwitz.  Thus (iv) holds for a suitable choice of $M_0$ with
+$\mu_i^0>\mu_i=0$.
+
+\smallskip\noindent
+\textit{(v).}
+Let $\Lambda$ denote the stationary set of the Lur\'e system
+\eqref{eq:HNN-shifted}.  In Section~\ref{sec:problem} and in the
+subsection on existence and uniqueness of equilibrium we have already
+shown that, under \textbf{C1}, \textbf{C2} and \textbf{C3}
+(and hence \textbf{C3$'$} by Lemma~\ref{lem:C3prime-implies-C3}), the
+Hopfield inclusion \eqref{eq:special_conv} admits a \emph{unique}
+equilibrium $e$.  After the equilibrium shift, this means that the
+stationary set of \eqref{eq:HNN-shifted} is the singleton
+$\Lambda=\{0\}$, which is certainly bounded.
+
+The second part of (v) excludes nonstationary complete trajectories
+along which a Lyapunov function is constant.  Define the YLG
+Lyapunov function
+\begin{equation}\label{eq:YLG-V-def}
+    V(x)
+    := \frac12\,x^* H x + 
+       \sum_{i=1}^n \vartheta_i
+       \int\limits_0^{\sigma_i} \varphi_i(\lambda)\,d\lambda,
+\end{equation}
+where $H\succ0$ is the symmetric matrix obtained from the YLG
+frequency inequality (cf.\ Eqns.~(3.10)–(3.11) in Chapter~3 of YLG)
+and $\vartheta_i$ are the diagonal entries of~$\Theta$.  Because each
+$\varphi_i$ is monotone and has at most linear growth (by
+\textbf{C1}), the integrals in~\eqref{eq:YLG-V-def} are well defined
+and $V$ is continuous and radially unbounded.
+
+Following exactly the differentiation argument of YLG (see the proof
+of Theorem~3.1 on pp.~113–114), one obtains for any Filippov solution
+$x(\cdot)$ of \eqref{eq:HNN-shifted} and any measurable selection
+$\xi(\cdot)\in\varphi(\sigma(\cdot))$ the estimate
+\[
+  \dot V(x(t)) \le 0 \quad\text{for a.e. }t\in\mathbb{R},
+\]
+with equality if and only if simultaneously
+$\xi_i(t)\,\sigma_i(t)=0$ for all $i$ and
+$x(t)^* H x(t)\equiv\mathrm{const}$.  Hence, if a complete
+trajectory satisfies the identities stated in item (v), it must have
+$\dot V\equiv 0$ and therefore $Px(t)+q\xi(t)\equiv 0$.  In other
+words, the trajectory is stationary.  This verifies (v).
+
+\smallskip\noindent
+\textit{(vi).}
+With $\mu_i=0$, condition (vi) of Theorem~3.1 reduces to
+\[
+  (\xi_i-\xi_i^0)\bigl(\sigma_i-\sigma_i^0\bigr) \ge 0,
+  \qquad \forall\xi_i\in\varphi_i(\sigma_i),
+\]
+for all stationary $(x^0,\xi^0)$ and all $(x,\xi)$ sufficiently close
+to $\Lambda$.  Since each $\varphi_i$ is monotone nondecreasing, this
+inequality holds for every pair $(\sigma_i,\xi_i)$,
+$(\sigma_i^0,\xi_i^0)$ with $\xi_i\in\varphi_i(\sigma_i)$,
+$\xi_i^0\in\varphi_i(\sigma_i^0)$, not only in a neighbourhood of the
+stationary set.  Thus (vi) is satisfied as well.
+\end{proof}
+
+\subsubsection*{Conclusion: global asymptotic stability}
+
+We can now state and prove the main result.
+
+\begin{proof}
+Item~1 is exactly Proposition~\ref{prop:global-existence}.  Item~2 is
+established in the subsection on existence and uniqueness of
+equilibrium, which uses Assumptions~\textbf{C1}, \textbf{C2} and the
+derived condition~\textbf{C3$'$} (hence ultimately \textbf{C3}) to
+exclude multiple equilibria.
+
+For item~3, perform the equilibrium shift $z=x-e$ and rewrite the
+network in the Lur\'e form \eqref{eq:HNN-shifted}.  By
+Lemma~\ref{lem:YLG-conditions}, all hypotheses (i)–(vi) of
+Theorem~3.1 in Chapter~3 of YLG are satisfied.  Therefore the
+stationary set $\Lambda$ of \eqref{eq:HNN-shifted} is pointwise
+globally stable.  Since $\Lambda=\{0\}$ (uniqueness of equilibrium),
+this means that the origin is globally asymptotically stable for the
+shifted inclusion.  Undoing the shift gives global asymptotic
+stability of the equilibrium $e$ for the original Hopfield network
+\eqref{eq:special} in the sense of Filippov.
+\end{proof}
+
+\section{Nonunique Filippov trajectories:
+A Low–Dimensional Example}\label{sec:nonunique}
+
+In this section, we present a low-dimensional example demonstrating that, even when the standard assumptions \textbf{C1--C3} (linear growth, extended nonlinearity structure, and the YLG-type frequency condition) are satisfied, the corresponding Filippov inclusion may admit multiple distinct forward trajectories originating from the same initial state. This demonstrates that global asymptotic stability of a unique equilibrium does not, in general, guarantee forward uniqueness of Filippov solutions. Throughout this section and Section~\ref{sec:examples}, we will employ the diagonal Lyapunov stability condition \textbf{C3$'$} in place of the original frequency-domain criterion \textbf{C3}. Since the matrix inequality is rigorously implied by the spectral condition (Lemma~\ref{lem:C3prime-implies-C3}), this substitution preserves all theoretical guarantees while providing a more transparent algebraic framework for the examples under consideration.
+
+Consider a two-dimensional Hopfield network
+\begin{equation}\label{eq:example-system}
+\begin{cases}
+\dot{x}_{1}=-x_{1},\\
+\dot{x}_{2}=-x_{2}+a\,\operatorname{sign}(x_{1}),
+\end{cases}
+\qquad x=(x_{1},x_{2})^{*}\in\mathbb{R}^{2},
+\end{equation}
+
+In this example we take:
+\begin{equation}\label{eq:choice}
+B=I_{2},\qquad T=\begin{pmatrix}0&0\\ a&0\end{pmatrix},\qquad I=0,
+\end{equation}
+with a real parameter $a\in\mathbb{R}$, and discontinuous  activation:
+\begin{equation}\label{eq:activation}
+g_{1}(s)=\operatorname{sign}(s),\qquad g_{2}(s)\equiv 0,
+\end{equation}
+where 
+\[
+\operatorname{sign}(s)=
+\begin{cases}
+-1,&s<0,\\
+0,&s=0,\\
++1,&s>0.
+\end{cases}
+\]
+
+The system \eqref{eq:example-system} satisfies conditions \textbf{C1--C3} for $|a|<2$:
+\begin{itemize}
+\item \textbf{C1 (linear growth):} $|g_{1}(\xi)|\leq 1$, $g_{2}\equiv 0$.
+\item \textbf{C2 (extended nonlinearity):} $g_{1}$ is a selection of the subdifferential $\partial\zeta_{1}$ of the convex function $\zeta_{1}(s)=|s|$; $g_{2}\equiv 0$ corresponds to $\zeta_{2}\equiv 0$.
+\item \textbf{C3 $\Rightarrow$ C3$'$ (diagonal stability):} With $H=I_{2}$ and $\alpha=1$, the matrix inequality
+\[
+-2I_{2}+(T+T^{*})\prec 0
+\]
+holds when $|a|<2$.
+\end{itemize}
+
+Due to the discontinuity, we interpret \eqref{eq:example-system} in the Filippov sense. The regularized inclusion reads
+\begin{equation}\label{eq:filinc-example}
+\begin{cases}
+\dot{x}_{1}=-x_{1},\\
+\dot{x}_{2}\in -x_{2}+a\,G_{1}(x_{1}),
+\end{cases}
+\end{equation}
+where 
+\[
+G_{1}(x_{1})=
+\begin{cases}
+\{-1\},&x_{1}<0,\\
+[-1,1],&x_{1}=0,\\
+\{+1\},&x_{1}>0,
+\end{cases}
+\]
+and $G_{2}(x_{2})\equiv\{0\}$.
+
+The first equation in \eqref{eq:filinc-example} is a classical linear ODE: for any $x_{1,0}\in\mathbb{R}$
+\[
+x_{1}(t)=x_{1,0}e^{-t}
+\]
+is the unique solution. In particular, if $x_{1,0}=0$, then
+\[
+x_{1}(t)\equiv 0\quad\text{for all }t\geq 0.
+\]
+So for the initial condition $x(0)=(0,0)$, the first equation gives $x_{1}(t)\equiv 0$. 
+
+Substituting $x_{1}(t)=0$ into the second inclusion in \eqref{eq:filinc-example} yields
+\[
+G_{1}(x_{1}(t))=G_{1}(0)=[-1,1],
+\]
+and the dynamics of $x_{2}$ reduce to the scalar differential inclusion
+\begin{equation}\label{eq:scalarinc}
+\dot{x}_{2}(t)\in -x_{2}(t)+a\,[-1,1]=\bigl[-x_{2}(t)-a,\,-x_{2}(t)+a\bigr].
+\end{equation}
+Thus, along the invariant line $\{x_{1}=0\}$ the 2D Filippov system \eqref{eq:filinc-example} reduces to the 1D inclusion \eqref{eq:scalarinc}.
+
+Now we will show that for the initial condition $x(0)=(0,0)$ there exist distinct Filippov solutions of \eqref{eq:example-system}, i.e., forward uniqueness fails.
+
+Fix $a\in(0,2)$ and consider the initial condition
+\[
+x(0)=(0,0).
+\]
+As noted above, the first coordinate is uniquely determined:
+\[
+x_{1}(t)\equiv 0\quad\text{for all }t\geq 0.
+\]
+Hence any Filippov solution with this initial condition must satisfy \eqref{eq:scalarinc} for $x_{2}(t)$.
+
+\medskip
+\textbf{Solution 1: upper branch.}
+Choose the upper endpoint of the interval in \eqref{eq:scalarinc}, i.e. enforce
+\[
+\dot{x}_{2}(t)=-x_{2}(t)+a.
+\]
+Solving this ODE with $x_{2}(0)=0$ gives
+\[
+x_{2}^{(1)}(t)=a\bigl(1-e^{-t}\bigr),\qquad t\geq 0.
+\]
+Then
+\[
+\dot{x}_{2}^{(1)}(t)=-x_{2}^{(1)}(t)+a\in\bigl[-x_{2}^{(1)}(t)-a,\,-x_{2}^{(1)}(t)+a\bigr],
+\]
+so $(x_{1}^{(1)}(t),x_{2}^{(1)}(t))=(0,a(1-e^{-t}))$ is a Filippov solution of \eqref{eq:example-system} with $x^{(1)}(0)=(0,0)$.
+
+\medskip
+\textbf{Solution 2: lower branch.}
+Choose the lower endpoint of the interval in \eqref{eq:scalarinc}, i.e. enforce
+\[
+\dot{x}_{2}(t)=-x_{2}(t)-a.
+\]
+Solving with $x_{2}(0)=0$ gives
+\[
+x_{2}^{(2)}(t)=-a\bigl(1-e^{-t}\bigr),\qquad t\geq 0.
+\]
+Then
+\[
+\dot{x}_{2}^{(2)}(t)=-x_{2}^{(2)}(t)-a\in\bigl[-x_{2}^{(2)}(t)-a,\,-x_{2}^{(2)}(t)+a\bigr],
+\]
+and $(x_{1}^{(2)}(t),x_{2}^{(2)}(t))=(0,-a(1-e^{-t}))$ is also a Filippov solution of \eqref{eq:example-system} with $x^{(2)}(0)=(0,0)$.
+
+\begin{proposition}[Nonuniqueness of forward trajectories]
+For any $a\in(0,2)$, system \eqref{eq:example-system} has at least two distinct Filippov solutions $x^{(1)}(\cdot)$ and $x^{(2)}(\cdot)$ defined on $[0,+\infty)$ with the same initial condition $x^{(1)}(0)=x^{(2)}(0)=(0,0)$.
+\end{proposition}
+\begin{IEEEproof}
+See Appendix \ref{prop3_proof}.
+\end{IEEEproof}
+
+\begin{remark}
+In fact, there exists a continuum of Filippov solutions starting from $(0,0)$. If we consider
+\[
+\dot{x}_{2}(t)=-x_{2}(t)+a\,\mu(t),\qquad x_{2}(0)=0.
+\]
+The unique solution of this linear ODE is
+\[
+x_{2}(t)=e^{-t}\int\limits_{0}^{t}e^{s}\,a\,\mu(s)\,ds,
+\]
+which satisfies \eqref{eq:scalarinc} almost everywhere. For each such $\mu$ we obtain a distinct Filippov solution $x(t)=(0,x_{2}(t))^{*}$ of \eqref{eq:example-system} with $x(0)=(0,0)$.
+\end{remark}
+
+
+Thus, even though the YLG conditions \textbf{C1--C3} guarantee global asymptotic stability of the unique equilibrium (here the origin), they do not ensure forward uniqueness of Filippov trajectories. This example highlights that the regularity required for a well-posed semiflow is stronger than that needed for stability alone.
+
+\section{Challenges in Numerical Simulation of HNNs with Discontinuous Activations}\label{sec:examples}
+
+% In this section we will translate four optimization tasks into the
+% discontinuous HNN template.
+
+Let us reinforce the analytical results of our work 
+(and Theorem 3 from Appendix \ref{app:proofs}) with an example.
+Consider the system of differential equations:
+\begin{equation}\label{example1}
+\begin{cases}\frac{\mathbf{d}x_1}{\mathbf{d}{t}}=-x_1-\frac 1 4 g_1(x_1)-\frac 1 8 g_2(x_2),\\\frac{\mathbf{d}x_2}{\mathbf{d}{t}}=-x_2+\frac 1 8 g_1(x_1)-\frac 1 4 g_2(x_2).\end{cases}
+\end{equation}
+
+where the activation functions are as follows:
+% \begin{equation*}
+% f_i(x_i) = \begin{cases}\tanh(x) -x+1,&x>0,\\ \tanh(x)+x-1, &x\leqslant0,\end{cases} ~~~i\in 1:2.
+%  \end{equation*}
+\begin{equation*}
+    g_i(x_i) = \begin{cases}1-x_i,&x_i>0,\\ e^{x_i}-1, &x_i\leqslant0,\end{cases} \quad i\in 1:2.
+\end{equation*}
+
+This function has a first-order discontinuity and is neither bounded nor monotonic (see Fig. \ref{fig2:left}).
+Since the main conditions are satisfied, the origin $(0,0)$
+is a globally asymptotically stable equilibrium point,
+as can be seen from the phase portrait that we obtained by modeling system $(\ref{example1})$ using Python (see Fig. \ref{fig2:right}).
+
+
+Now let’s take function $s(x)$ (Fig. \ref{fig4:left}) as activation for the system $(\ref{example1})$. Assumptions \textbf{C1} (linear growth) and \textbf{C2} (unilateral Lipschitz-like condition) fail because, as stated in~\cite{unilateral_Lipschitz_like_condition}, this function possesses super linear growth and does not comply with unilateral Lipschitz-like condition. The restriction condition from definition \ref{G_n} is also violated $s_i((-1)^+) = 0.01 < 3 = s_i((-1)^-)$ and therefore this function does not belong to the class $\mathcal{G'}$ (Definition \ref{G_n}). 
+
+\begin{equation*}
+    s_i(x_i) = \begin{cases} 0.01, & |x_i| \leqslant 1, \\ 
+    x_i^4+2, & 
+    |x_i| > 1, \end{cases} \quad i\in 1:2.
+\end{equation*}
+
+
+Consequently, such a system fails to satisfy all the assumptions stated in section~\ref{sec:problem} and therefore topological structure of the phase space is drastically changed and this system no longer has a unique globally asymptotically stable equilibrium point., as is evident from the phase portrait (Fig. \ref{fig4:right}).
+
+Lastly, let's present the counterexample to assumption \textbf{C3$'$} (DLS) by taking a skew-symmetric matrix $T$ ($T^{*} = -T$):
+
+\begin{equation}\label{example2}
+\begin{cases}\frac{\mathbf{d}x_1}{\mathbf{d}{t}}=-x_1- s_2(x_2),\\\frac{\mathbf{d}x_2}{\mathbf{d}{t}}=-x_2 + s_1(x_1.\end{cases}
+\end{equation}
+
+Fig. \ref{fig5:left} shows that even though activation function is viable, assumptions on the coefficients of the system are also very important in establishing global asymptotic stability.
+
+
+\begin{figure*}[h]
+\begin{minipage}{0.49\linewidth}
+\includegraphics[width=1.05\textwidth]{Figures/g(x).png}
+  \caption{Graph for the activation function $g(x)$.}\label{fig2:left}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\linewidth}
+ \includegraphics[width=1.05\textwidth]{draft2_with_another_func.png}
+  \caption{Phase portrait of the system $(\ref{example1})$ with $g(x)$ activation.}\label{fig2:right}
+\end{minipage}
+\end{figure*}
+
+
+\begin{figure*}[h]
+\begin{minipage}{0.49\linewidth}
+\includegraphics[width=1.05\textwidth]{Figures/s(x).png}
+  \caption{Graph for the activation function $s(x)$.}\label{fig4:left}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\linewidth}
+ \includegraphics[width=1.05\textwidth]{Figures/f_1(x) good sys.png}
+  \caption{Phase portrait of the system $(\ref{example1})$ with $s(x)$ activation.}\label{fig4:right}
+\end{minipage}
+\end{figure*}
+
+\begin{figure*}[h]
+\begin{minipage}{0.49\linewidth}
+\includegraphics[width=1.05\textwidth]{Figures/g(x) bad sys.png}
+  \caption{Phase portrait of the system $(\ref{example2})$ with $g(x)$ activation.}\label{fig5:left}
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\linewidth}
+ \includegraphics[width=1.05\textwidth]{Figures/f_1(x) bad sys.png}
+  \caption{Phase portrait of the system $(\ref{example2})$ with $s(x)$ activation.}\label{fig5:right}
+\end{minipage}
+\end{figure*}
+
+\section{Application I: Quadratic Unconstrained Binary Optimization via Discontinuous HNNs}
+\label{sec:qubo-hnn}
+
+We show that under a \emph{strong field} regime, 
+a discontinuous HNN with sign activations globally recovers the unique QUBO optimizer.
+
+\subsection{QUBO with Strong Field and Uniqueness}
+Consider
+\begin{equation}\label{eq:qubo-energy}
+  \min_{s\in\{-1,1\}^n}\ E(s)=\tfrac12 s^* Q s - h^* s,\quad Q=Q^*.
+\end{equation}
+\begin{definition}[Strong field]\label{def:strong-field}
+\((Q,h)\) satisfies the strong field condition if
+\begin{equation}\label{eq:strong-field}
+  |h_i|>\sum_{j\neq i}|Q_{ij}|\ \ \forall i.
+\end{equation}
+
+\end{definition}
+\begin{lemma}[Unique minimizer]\label{lem:qubo-unique}
+Under the strong field condition, \(s'=\mathrm{sign}(h)\) 
+is the unique global minimizer of \eqref{eq:qubo-energy}. 
+Proof in Appendix~\ref{app:qubo-proofs}.
+\end{lemma}
+
+\subsection{HNN Embedding and Global Convergence}
+Use the Lur’e form \(\dot x=-Bx+Tg(x)+I\) with
+\begin{equation}\label{eq:hnn-qubo}
+  \dot x = -B x - \beta Q_{\mathrm{shift}}\, g(x) + \beta h,\quad
+  g_i(u)=\mathrm{sign}(u),
+\end{equation}
+where \(B=\mathrm{diag}(b_i)\succ0\), \(\beta>0\), and
+\begin{equation}\label{eq:Qshift}
+  Q_{\mathrm{shift}}:=Q+\mu I,\quad \mu>\lambda^+_{\max}(Q)\ \Rightarrow\ Q_{\mathrm{shift}}\succ0.
+\end{equation}
+Then \(T=-\beta Q_{\mathrm{shift}}\) yields \(T+T^*\prec0\), so \textbf{C3} holds (with \(\alpha=I\)); \textbf{C1-C2} hold for the sign activation.
+\begin{theorem}[Global convergence to the planted optimizer]\label{th:hnn-solves-strong-field-qubo}
+Under the strong field condition and \textbf{C1-C3}, \eqref{eq:hnn-qubo} has a unique Filippov equilibrium \(x'\), globally asymptotically stable, and \(g(x')=\mathrm{sign}(x')=s'\), the unique QUBO optimizer. 
+Proof in Appendix~\ref{app:qubo-proofs}.
+\end{theorem}
+
+\subsection{Planted MAX-CUT with Strong Field}\label{subsec:planted-maxcut}
+Let \(G=(V,E,w)\) be a weighted graph and \(Q^{\mathrm{MC}}\) the MAX-CUT matrix
+\(
+Q^{\mathrm{MC}}_{ij}=-\tfrac12 w_{ij}\ (i\ne j),\ Q^{\mathrm{MC}}_{ii}=0.
+\)
+Partition \(V=A\cup B\), and define a field \(h_i=\gamma\) for \(i\in A\), \(h_i=-\gamma\) for \(i\in B\).
+If the weights satisfy
+\begin{equation}\label{eq:gamma-condition}
+  \gamma>\tfrac12\max\!\big\{(n_A-1)w_{\mathrm{in}}\!+\!n_B w_{\mathrm{out}},\ (n_B-1)w_{\mathrm{in}}\!+\!n_A w_{\mathrm{out}}\big\},
+\end{equation}
+then \((Q^{\mathrm{MC}},h)\) meets Definition~\ref{eq:strong-field}. With \(Q_{\mathrm{shift}}=Q^{\mathrm{MC}}+\mu I\succ0\) and the HNN \eqref{eq:hnn-qubo}, Theorem~\ref{th:hnn-solves-strong-field-qubo} implies:
+\begin{corollary}\label{cor:hnn-planted-maxcut}
+The HNN output converges globally to \(s'\) aligned with the planted partition \((A,B)\), which is the unique minimizer of the MAX-CUT QUBO with field. Proof in Appendix~\ref{app:qubo-proofs}.
+\end{corollary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Application II: Constrained Optimization via HNNs and the Penalty Method}
+\label{sec:penalty-HNN}
+
+We consider a nonlinear program
+\begin{equation}\label{eq:orig-P}
+  \min_{x\in\mathbb{R}^n} f(x)\quad\text{s.t.}\quad g_i(x)\le 0,\ i=1,\dots,m,
+\end{equation}
+and the quadratic exterior penalty \(p(x)=\sum_i (\max\{0,g_i(x)\})^2=\|g^+(x)\|_2^2\).
+For \(c>0\), define the penalized subproblem
+\begin{equation}\label{eq:penalty-Pc}
+  P(c):\quad \min_{x} q_c(x):=f(x)+c\,p(x).
+\end{equation}
+Classical exact-penalty theory ensures that for \(c\) large enough, global minimizers of \(q_c\) approach feasible solutions of \eqref{eq:orig-P}.
+
+\subsection{Embedding the Penalty Subproblem in Discontinuous~HNN}
+Represent \(q_c\) with a convex–nonsmooth potential \(\phi\) whose subdifferential aggregates the smooth gradient and the penalty kink (via \(g_i^+\)); add a diagonal leakage to form
+\begin{equation}\label{eq:penalty-V}
+  V(x)=\phi(x)+\tfrac12 x^* A x - \ell^* x,\qquad A\succ0,
+\end{equation}
+and run \(\dot x\in -\partial V(x)\). This realizes \(\dot x=-Bx+T g(x)+I\) 
+with finitely many discontinuities in the activation (from \(\max\{0,\cdot\}\)), 
+satisfying our conditions after a standard diagonal shift of the quadratic part (YLG/Lur’e spirit). 
+Then the unique GAS equilibrium \(x'\) solves \(P(c)\). 
+Construction and checks are in Appendix~\ref{app:penalty-proofs}.
+
+\subsection{Example: Soft–Margin SVM in Hopfield Form}\label{sec:SVM-HNN}
+The \(\ell_2\) soft-margin SVM
+\begin{equation}\label{eq:SVM-primal}
+  \min_{w,b,\xi}\ \tfrac12\|w\|^2 + C\sum_i \xi_i\quad \text{s.t.}\quad 
+  y_i(w^* z_i + b) \ge 1-\xi_i,\ \xi_i\ge 0
+\end{equation}
+can be written as an exact-penalty objective
+\begin{equation}\label{eq:SVM-penalty}
+  q_\rho(u,\xi)=\tfrac12 u^* u + C\sum_i \xi_i + \rho\sum_i \max\{0,\,1-\xi_i-y_i u^*\bar z_i\},
+\end{equation}
+with \(u=(w^*,b)^*\), \(\bar z_i=(z_i^*,1)^*\), and sufficiently large~\(\rho\).
+Let \(x=(u^*,\xi^*)^*\). The piecewise-linear kinks in the hinge term define a componentwise discontinuous activation (single upward jump). Choosing a diagonal leakage and a shifted quadratic synaptic matrix (so \(T+T^*\prec0\)) yields a discontinuous HNN of the Lur’e form satisfying \textbf{C1-C3}. Therefore:
+\begin{proposition}[Unique globally convergent SVM solver]\label{prop:SVM}
+The Hopfield network built from \eqref{eq:SVM-penalty} by \(\dot x\in -\partial V(x)\) has a unique Filippov equilibrium \(x'=(u',\xi')\) and \(x(t)\to x'\) from any initialization. 
+The classifier parameters \((w',b')\) coincide with the optimal soft-margin SVM solution. 
+\end{proposition}
+Proof in Appendix~\ref{app:penalty-proofs}.
+
+\paragraph*{Summary}
+For constrained problems, exact/exterior penalties produce discontinuous activations (via \(\max\{0,\cdot\}\)) that squarely fit the Filippov/YLG toolbox. Under \textbf{C1-C3}, the associated HNN has a unique GAS equilibrium equal to the penalized optimizer, and—in the SVM case—recovers the primal solution without schedules or coordination mechanisms.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Application III: Discontinuous HNN as a Real-Time Solver for Constrained Optimal Control Problem}
+\label{sec:application_control}
+
+We illustrate why a \emph{unique globally asymptotically stable} equilibrium is essential when the HNN serves as a \emph{real-time} optimizer inside a feedback loop.
+
+\subsection{Setup: Linear Plant and Box-Constrained Quadratic Law}
+Consider the LTI plant
+\begin{equation}\label{eq:plant}
+  \dot z = Fz + Gu, \qquad z\in\mathbb{R}^n,\ u\in\mathbb{R}^m,
+\end{equation}
+with componentwise box constraints \(u_{\min}\le u\le u_{\max}\).
+At each frozen state \(z\), the control \(u'(z)\) is the unique solution of the strictly convex QP
+\begin{equation}\label{eq:opt-problem}
+  \min_{u\in\mathbb{R}^m}\ J_z(u) := \tfrac12 u^* H u + f(z)^* u
+  \quad\text{s.t.}\quad u_{\min}\le u\le u_{\max},
+\end{equation}
+where \(H\succ0\) and \(f(\cdot)\) is affine. The solver must operate continuously as \(z\) evolves; multi-valued or initial-state-dependent outcomes are unacceptable.
+
+\subsection{HNN Structure via a Convex Nonsmooth Potential}
+Let \(x\in\mathbb{R}^m\) denote the HNN state (interpreted as \(u\)).
+Encode the cost and constraints with
+\begin{multline}\label{eq:phi-def}
+  \phi(x):=\tfrac12 x^* Hx + \sum_{i=1}^m \iota_{[u_{\min,i},u_{\max,i}]}(x_i),
+  \\
+  \partial\phi(x)=Hx + N_{[u_{\min},u_{\max}]}(x),
+\end{multline}
+and define the parameterized energy
+\begin{equation}\label{eq:Vz-def}
+  V_z(x):=\phi(x)-b(z)^* x+\tfrac12 x^* A x,
+\end{equation}
+with \(A\succ0\) diagonal and \(b(z)\) affine in \(z\).
+We run the \emph{subgradient flow}
+\begin{equation}\label{eq:hnn-subgrad}
+  \dot x \in -\partial V_z(x).
+\end{equation}
+This is a Filippov inclusion with finitely many first-order discontinuities (due to the box normal cone). It fits the Lur’e form \(\dot x=-Bx+Tg(x)+I\) and satisfies linear growth, one-sided slope and YLG-type frequency condition under the choices below.
+
+\begin{proposition}[Real-time solver]\label{prop:rt-solver}
+Under Assumptions~\textbf{C1--C3} and the model \eqref{eq:hnn-subgrad}–\eqref{eq:Vz-def}, for each frozen \(z\) the HNN admits a unique Filippov equilibrium \(x'(z)\), globally asymptotically stable, and \(x'(z)=u'(z)\) solves \eqref{eq:opt-problem}. \emph{(Proof in Appendix~\ref{app:control-proofs}.)}
+\end{proposition}
+
+\paragraph*{Why uniqueness matters}
+Embedding the HNN into the loop
+\begin{equation}\label{eq:closed-loop}
+  \dot z = Fz + Gx, \qquad \dot x\in -\partial V_z(x),
+\end{equation}
+requires a single-valued, robust control law \(u=\kappa(z)\). If multiple stable equilibria coexisted for a given \(z\), the closed-loop action would depend on internal initial conditions \(x(0)\), jeopardizing predictability and stability.
+
+\subsection{1D Illustrative Example}\label{subsec:illustrative-example-control}
+Plant: \(\dot z=-z+u\), \(|u|\le 1\). Instantaneous QP
+\begin{equation}\label{eq:ex-qp}
+  \min_{u\in[-1,1]}\ J_z(u):=\tfrac12 h u^2 + \alpha z u, \quad h>0,\ \alpha>0,
+\end{equation}
+has solution \(u'(z)=\Pi_{[-1,1]}(-\alpha z/h)\).
+Choose
+\[
+  \phi(x)=\tfrac12 h x^2 + \iota_{[-1,1]}(x),\quad
+  V_z(x)=\phi(x)-\alpha zx+\tfrac12 a x^2,\ a>0,
+\]
+and evolve \(\dot x\in -\partial V_z(x) = -(h+a)x+\alpha z - N_{[-1,1]}(x)\).
+Then
+\[
+  \dot V_z(x)\le -a x^2<0\ \ (x\neq x'(z)),
+\]
+so \textbf{C1-C3} hold; \(x'(z)=u'(z)\) 
+and the closed loop has the unique equilibrium \((z',x')=(0,0)\). 
+See corresponding derivations in Appendix~\ref{app:control-proofs}.
+
+\subsection{2D Illustrative Example}\label{subsec:2d-example-control}
+Plant: \(\dot z = Az+Bu\) with
+\[
+A=\begin{bmatrix}-1&1\\0&-2\end{bmatrix},\quad
+B=I_2,\quad u\in[-1,1]^2.
+\]
+QP:
+\begin{multline*}    
+  \min_{u\in[-1,1]^2}\ J_z(u)=\tfrac12 u^* H u + q(z)^* u, \\
+  H=\mathrm{diag}(2,1),\ 
+  q(z)=\begin{bmatrix}z_1+0.5 z_2\\ 2z_2\end{bmatrix}.
+\end{multline*}
+Then \(u'(z)=\Pi_{[-1,1]^2}\big(-H^{-1}q(z)\big)\).
+Let
+\begin{multline*}
+  \phi(x)=\tfrac12 x^* Hx+\iota_{[-1,1]^2}(x),\\
+  V_z(x)=\phi(x)-q(z)^* x+\tfrac12 x^* A_\ell x,\\ 
+  A_\ell=\mathrm{diag}(a_1,a_2)\succ0,
+\end{multline*}
+and \(\dot x\in -\partial V_z(x)=-(H+A_\ell)x+q(z)-N_{[-1,1]^2}(x)\).
+Then \(\dot V_z\le -x^* A_\ell x\), hence \textbf{C1--C3} hold and \(x'(z)=u'(z)\) globally. 
+See details in Appendix~\ref{app:control-proofs}.
+% \vspace{-1mm}
+\begin{remark}
+The convex normal-cone implements saturation as a discontinuous activation, placing the design squarely in the Filippov/YLG setting used by our main theorem.
+\end{remark}
+
+
+\section{Discussion and Conclusion}\label{sec:concl}
+The classical Yakubovich--Leonov--Gelig machinery provides a concise proof
+of the uniqueness and global stability of Hopfield equilibria under the
+non‑smooth conditions \textbf{C1--C3}.  Besides simplifying the argument, the method
+highlights how frequency–domain negativity of \(\alpha T+T^{\!*}\alpha\)
+serves as the decisive criterion, irrespective of boundedness or monotonicity
+of activation functions. For the Hopfield model new results on global stability
+in the case of neither monotonic, nor bounded activation functions,
+which extend the previous results from~\cite[see Theorems~1-3]{p1} 
+and \cite[see Theorems~1-3]{our_paper}, 
+were derived and proven.
+Numerical simulations approving the obtained results are demonstrated.
+
+\section*{Acknowledgment}
+
+\noindent\textit{Dedication.} 
+This paper is dedicated to the memory of V.A.~Yakubovich (21~Oct~1926--17~Aug~2012) 
+and G.A.~Leonov (2~Feb~1947--23~Apr~2018). 
+The centenary year of Yakubovich (2026) and the approaching 80th anniversary of Leonov (2027) 
+commemorate their outstanding contributions to nonlinear control theory---especially to absolute stability and to systems with discontinuous nonlinearities---and to the development of cybernetics and early directions of artificial intelligence. 
+G.A.~Leonov was a fomer student of V.A.~Yakubovich; both were our teachers and fathers in science.
+
+\medskip
+This work is supported by the Russian Science Foundation (RSF, Russia) 
+project 25-11-00147.
+
+
+\printbibliography 
+
+\newpage
+\appendices
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Yakubovich--Leonov--Gelig Functionals and Auxiliary Results for Lur\'e Systems.} \label{app:YLG}
+
+\subsection{Existence and global continuation of Filippov solutions}
+
+\begin{theorem}[Local existence for differential inclusions (see~{\cite[Thm.~1.1]{YLG}})]
+Let $t_0\in\mathbb{R}$, $a\in\mathbb{R}^N$, and let
+\[
+D := \bigl\{(x_1,t_1)\in\mathbb{R}^N\times\mathbb{R}
+       \;\big|\; |t_1-t_0|\le \alpha,\ |x_1-a|\le\rho \bigr\}
+\]
+for some $\alpha>0$, $\rho>0$.
+Suppose that for every $(x_1,t_1)\in D$ the multivalued map
+$f:\mathbb{R}^N\times\mathbb{R}\rightrightarrows\mathbb{R}^N$
+satisfies:
+\begin{enumerate}
+  \item $f$ is upper semicontinuous at $(x_1,t_1)$;
+  \item the value $f(x_1,t_1)$ is nonempty, closed, bounded and convex;
+  \item there exists $c>0$ such that
+        \begin{equation}\label{eq:f-bound-local}
+           \sup\{\,|y| : y\in f(x_1,t_1)\,\} \;=\; c,
+           \qquad (x_1,t_1)\in D .
+        \end{equation}
+\end{enumerate}
+Consider the differential inclusion
+\begin{equation}\label{eq:incl-local}
+   \dot x(t) \in f(x(t),t).
+\end{equation}
+Then, for any initial condition
+\begin{equation}\label{eq:initial-local}
+   x(t_0) = a,
+\end{equation}
+there exists at least one absolutely continuous solution $x(\cdot)$
+of~\eqref{eq:incl-local}--\eqref{eq:initial-local}
+on the interval
+\[
+   |t-t_0|\le\tau, \qquad
+   \tau := \min\{\alpha,\ \rho/c\}.
+\]
+\end{theorem}
+
+\begin{theorem}[Wintner--type continuation criterion (see~{\cite[Thm.~1.3]{YLG}})]
+Let the multivalued right-hand side $f:\mathbb{R}^N\times(0,+\infty)
+\rightrightarrows\mathbb{R}^N$ of the inclusion
+\begin{equation}\label{eq:incl-global}
+   \dot x(t) \in f(x(t),t)
+\end{equation}
+be defined for all $x\in\mathbb{R}^N$ and all $t\in(0,+\infty)$
+(\emph{respectively,} for all $t\in\mathbb{R}$).
+Assume that there exists a function $L:[0,+\infty)\to(0,+\infty)$
+such that
+\begin{equation}\label{eq:L-bound}
+   |\xi| \le L(|x|),
+   \qquad \forall\,\xi\in f(x,t),\ \forall\,x\in\mathbb{R}^N,\
+          t\in(0,+\infty),
+\end{equation}
+and $L$ is positive, continuous and satisfies
+\begin{equation}\label{eq:Wintner-integral}
+   \int\limits_0^{+\infty} \frac{dr}{L(r)} = +\infty.
+\end{equation}
+Then every solution of~\eqref{eq:incl-global} can be continued to the
+entire half-line $0<t<+\infty$
+(\emph{respectively,} to the whole line $-\infty<t<+\infty$).
+\end{theorem}
+
+\subsection{Representing Filippov solutions via measurable extended nonlinearities}
+
+\begin{lemma}[Makarov measurable selection (see~{\cite[Lem.~1.2]{YLG}})]\label{lemma:makarov}
+Let $\mathcal{H}$ and $Q$ be compact metric spaces and
+$\Psi:\mathcal{H}\to Q$ be a continuous mapping onto $Q$.
+Then there exists a Borel-measurable mapping
+$\theta:Q\to\mathcal{H}$ such that
+\[
+   \Psi(\theta(q)) = q, \qquad \forall\,q\in Q.
+\]
+\end{lemma}
+
+\begin{theorem}[Makarov measurable extended nonlinearity (see~{\cite[Thm.~1.7]{YLG}})]\label{thm:makarov}
+Let $F:[a,b]\times\mathbb{R}^N\times\mathbb{R}^m\to\mathbb{R}^N$ be a
+vector function continuous in all arguments.
+Let $\sigma:[a,b]\times\mathbb{R}^N\to\mathbb{R}^\ell$ be a continuous
+vector function and let $\varphi:[a,b]\times\mathbb{R}^\ell
+\rightrightarrows\mathbb{R}^m$ be a multivalued map which is
+semicontinuous and whose values are closed bounded subsets of
+$\mathbb{R}^m$.
+Let $x_0:[a,b]\to\mathbb{R}^N$ be an absolutely continuous function
+satisfying, for almost all $t\in[a,b]$,
+\begin{equation}\label{eq:makarov-incl}
+   \dot x_0(t) \in \{\,F(t,x_0(t),\xi)\;|\; \xi\in A(t)\,\},
+\end{equation}
+where
+\[
+   A(t) := \varphi\bigl(t,\sigma(t,x_0(t))\bigr).
+\]
+Then there exists a Lebesgue-measurable vector-valued function
+$\xi_0:[a,b]\to\mathbb{R}^m$ such that
+\begin{equation}\label{eq:makarov-realization}
+   \dot x_0(t) = F\bigl(t,x_0(t),\xi_0(t)\bigr), \qquad
+   \xi_0(t)\in A(t),
+\end{equation}
+for almost all $t\in[a,b]$.
+\end{theorem}
+
+\begin{remark}%[On measurable selections and extended nonlinearities]
+Lemma~\ref{lemma:makarov} and Theorem~\ref{thm:makarov} are concrete instances of general measurable
+selection results of Kuratowski and Ryll--Nardzewski
+(see~\cite{kuratowski-ryll-nardzewski-1965} 
+and also~\cite{wagner-1977-measurable-selection-survey,castaing-valadier-1977,srivastava-1998-borel-sets}).
+
+Lemma~\ref{lemma:makarov} deals with a continuous surjection
+$\Psi:\mathcal{H}\to Q$ between compact metric spaces and asserts the
+existence of a Borel-measurable right inverse
+$\theta:Q\to\mathcal{H}$ with $\Psi(\theta(q))=q$ for all $q\in Q$.
+If one defines a multifunction $F(q):=\Psi^{-1}(\{q\})$, then
+$F(q)$ is a nonempty compact subset of $\mathcal{H}$ and the map
+$q\mapsto F(q)$ is weakly measurable. The Kuratowski--Ryll-Nardzewski
+measurable selection theorem ensures the existence of a measurable
+selection $\theta(q)\in F(q)$; 
+Lemma~\ref{lemma:makarov} is precisely this special
+case, specialized to compact metric spaces and a single continuous
+surjection.
+
+Theorem~\ref{thm:makarov} provides a ``pathwise'' measurable selection result
+for differential inclusions. Given an absolutely continuous solution
+$x_0(\cdot)$ of an inclusion of the form
+\[
+   \dot x_0(t) \in \{\,F(t,x_0(t),\xi)\mid \xi\in A(t)\,\},
+\]
+with $F$ continuous and $A(t)$ obtained from a semicontinuous
+multifunction with closed bounded values, 
+Theorem~\ref{thm:makarov} states that there
+exists a Lebesgue-measurable function $\xi_0(t)\in A(t)$ such that
+\[
+   \dot x_0(t) = F\bigl(t,x_0(t),\xi_0(t)\bigr)
+   \quad\text{for a.e. }t.
+\]
+In other words, along any absolutely continuous solution of the
+set-valued system one can select a measurable, single-valued
+``extended nonlinearity'' which realizes the dynamics exactly. This is
+again an application of measurable selection theorems (now to the
+multifunction
+$t\mapsto\{\xi\in A(t)\mid F(t,x_0(t),\xi)=\dot x_0(t)\}$).
+
+In the Hopfield-network setting considered in this paper, the
+right-hand side of the discontinuous HNN is interpreted in the Filippov
+sense. For any Filippov solution $x(\cdot)$ of the HNN, Theorem~\ref{thm:makarov}
+yields a measurable ``extended activation''
+$\eta(t)\in\operatorname{conv} g(x(t))$ such that, almost everywhere,
+the trajectory satisfies an ordinary differential equation of Lur'e
+type,
+\[
+   \dot x(t) = -B x(t) + T \eta(t) + I.
+\]
+Thus every Filippov trajectory of the discontinuous HNN can be viewed
+as a trajectory of a single-valued Lur'e system with a measurable
+input $\eta(\cdot)$ constrained to the convexified activation graph.
+This realization is crucial for applying the frequency-domain
+Yakubovich--Leonov--Gelig functionals and the Barabanov-type
+dichotomy/quasi-gradient-like criteria in the stability analysis.
+\end{remark}
+
+\subsection{Lyapunov-type lemmas for dichotomy and stability of stationary sets}
+
+Consider now the autonomous differential inclusion
+\begin{equation}\label{eq:aut-incl}
+   \dot x(t) \in f(x(t)), \qquad x(t)\in\mathbb{R}^n,
+\end{equation}
+with stationary set
+\[
+   \Lambda := \{\,x\in\mathbb{R}^n : 0\in f(x)\,\}.
+\]
+
+\begin{lemma}[Lyapunov function and dichotomy {\cite[Lem.~1.4]{YLG}}]\label{lem:YLGl1-4}
+Suppose there exists a continuous function $V:\mathbb{R}^n\to\mathbb{R}$
+having the properties:
+\begin{enumerate}
+  \item $V[x(t)]$ is nonincreasing in $t$ for any solution $x(t)$
+        of~\eqref{eq:aut-incl};
+  \item if the identity $V[x(t)]\equiv\mathrm{const}$ holds for all
+        $-\infty<t<\infty$ along some solution $x(t)$ that is bounded
+        for $-\infty<t<\infty$, then this solution $x(t)$ is stationary.
+\end{enumerate}
+Then system~\eqref{eq:aut-incl} is dichotomic.
+\end{lemma}
+
+\begin{lemma}[Quasi-gradient-likeness {\cite[Lem.~1.5]{YLG}}]\label{lem:YLGl1-5}
+Suppose there exists a continuous function $V:\mathbb{R}^n\to\mathbb{R}$
+which satisfies the conditions \emph{(1)} and \emph{(2)} of
+Lemma~\ref{lem:YLGl1-4} and, in addition,
+\begin{enumerate}
+  \setcounter{enumi}{2}
+  \item $V(x)\to +\infty$ as $|x|\to +\infty$.
+\end{enumerate}
+Then system~\eqref{eq:aut-incl} is quasi-gradient-like.
+\end{lemma}
+
+\begin{lemma}[Lyapunov stability of the stationary set {\cite[Lem.~1.6]{YLG}}]\label{lem:YLGl1-6}
+Suppose that the stationary set $\Lambda$ of~\eqref{eq:aut-incl} is
+bounded and that there exists an $\varepsilon$-neighbourhood
+$\Lambda_\varepsilon$ of $\Lambda$ such that there is a continuous
+function $V:\Lambda_\varepsilon\times\Lambda\to\mathbb{R}$ with the
+properties:
+\begin{enumerate}
+  \item $V(x,c)>0$ for all $x\in\Lambda_\varepsilon\setminus\Lambda$ and
+        all $c\in\Lambda$;
+  \item $V(c,c)=0$ for all $c\in\Lambda$;
+  \item for any solution $x(t)$ of~\eqref{eq:aut-incl},
+        $V[x(t),c]$ is nonincreasing in $t$ whenever $x(t)\in\Lambda_\varepsilon$.
+\end{enumerate}
+Then the stationary set $\Lambda$ is Lyapunov stable.
+\end{lemma}
+
+\begin{lemma}[Pointwise global stability {\cite[Lem.~1.7]{YLG}}]\label{lem:YLGl1-7}
+Assume that system~\eqref{eq:aut-incl} is quasi-gradient-like, all the
+hypotheses of Lemma~\ref{lem:YLGl1-6} are satisfied, and the equality
+$V(x,c)=0$ can hold only for $x=c$.
+Then the stationary set $\Lambda$ of system~\eqref{eq:aut-incl} is
+pointwise globally stable.
+\end{lemma}
+
+\subsection{YLG frequency–domain theorem for several nonlinearities}
+
+Consider the Lur'e–type system
+\begin{equation}
+  \dot x = P x + q\,\varphi(\sigma), 
+  \qquad \sigma = r^{*} x,
+  \label{eq:YLG-31-system}
+\end{equation}
+where $P\in\mathbb{R}^{n\times n}$, $q\in\mathbb{R}^{n\times m}$, 
+$r\in\mathbb{R}^{n\times m}$ are constant real matrices, 
+$\sigma=(\sigma_1,\dots,\sigma_m)^{*}$ and
+$\varphi(\sigma)=(\varphi_1(\sigma_1),\dots,\varphi_m(\sigma_m))^{*}$
+is an $m$–vector of scalar nonlinearities.  
+Each $\varphi_i(\sigma_i)$ is assumed to be \emph{piecewise single–valued}
+in the sense of~\cite{YLG}: it is single–valued and continuous everywhere,
+except at some isolated points (which do not accumulate on a finite
+interval), and at each such point its value is a closed segment containing
+the right and left limits.
+
+Define the transfer matrix
+\[
+  X(\lambda) := r^{*}(P-\lambda I)^{-1}q .
+\]
+
+\begin{theorem}[Barabanov {\cite[Thm.~3.1]{YLG}}]\label{th:YLG-3-1}
+Assume that the following conditions hold.
+\begin{enumerate}%[(i)]
+\item The transfer function $X(\lambda)$ is \emph{irreducible} in the
+sense of Definition~2.6 in~\cite{YLG}.
+
+\item There exist diagonal matrices
+\begin{multline*}
+   T=\operatorname{diag}(\tau_1,\dots,\tau_m)>0,\\
+   M=\operatorname{diag}(\mu_1,\dots,\mu_m)\ge0,\\
+   \theta=\operatorname{diag}(\vartheta_1,\dots,\vartheta_m)      
+\end{multline*}
+such that
+\begin{equation}
+   T M + \Re\bigl[(T+i\omega\theta)\,X(i\omega)\bigr] \;\succeq\; 0,
+   \quad \forall\,\omega\in(-\infty,+\infty),
+   \label{eq:YLG-31-freq}
+\end{equation}
+and
+\begin{equation}
+   \det(T+\lambda\theta)\neq0
+   \quad\text{whenever}\quad
+   \det(P-\lambda I)=0 .
+   \label{eq:YLG-31-det}
+\end{equation}
+
+\item For each $i=1,\dots,m$ the nonlinearity $\varphi_i$ satisfies
+\begin{align}
+ (\sigma_i-\mu_i\xi_i)\,\xi_i &\ge 0,
+   &&\forall\,\xi_i\in\varphi_i(\sigma_i),
+   \label{eq:YLG-31-sector}\\
+ \sigma_i &\notin \mu_i\varphi_i(\sigma_i),
+   &&\text{for all }\sigma_i\neq0 ,
+   \label{eq:YLG-31-sigma-notin}
+\end{align}
+and, in addition, if $\mu_i\neq0$ and $\vartheta_i<0$ then
+\begin{equation}
+   \int\limits_0^{+\infty} \bigl[\lambda-\mu_i\varphi_i(\lambda)\bigr]\,d\lambda
+   = +\infty .
+   \label{eq:YLG-31-integral}
+\end{equation}
+
+\item There exist numbers $\mu_i^0$, $1\le i\le m$, such that
+$\mu_i^0>\mu_i$ and the matrix
+\[
+   P + q M_0^{-1} r^{*}, 
+   \qquad M_0 := \operatorname{diag}(\mu_1^0,\dots,\mu_m^0),
+\]
+is Hurwitz.
+
+\item The stationary set $\Lambda$ of system~\eqref{eq:YLG-31-system}
+is bounded. Moreover, if a solution $(x(t),\xi(t))$ of
+\eqref{eq:YLG-31-system} satisfies
+\begin{equation}
+   \xi_i(t)\,\sigma_i(t)\equiv 0\quad(1\le i\le m), 
+   \qquad x^{*}(t)H x(t)\equiv\mathrm{const},
+   \label{eq:YLG-31-orthogonality}
+\end{equation}
+for all $-\infty<t<+\infty$ and some positive definite matrix
+$H\succ0$, then $x(t)\equiv x^0\in\mathbb{R}^n$, 
+$\xi(t)\equiv\xi^0\in\mathbb{R}^m$ are constant, and
+\[
+   P x^0 + q\xi^0 = 0,
+\]
+i.e., the solution $(x(t),\xi(t))$ is stationary.
+
+\end{enumerate}
+Then system~\eqref{eq:YLG-31-system} is \emph{quasi-gradient-like}.
+
+Suppose, in addition, that
+\begin{enumerate}%[(i)]\setcounter{enumi}{5}
+\item there exists a number $\varepsilon>0$ such that, whenever
+$\rho(x,\Lambda)<\varepsilon$, then for any stationary solution
+$(x^0,\xi^0)$ the inequalities
+\begin{multline}
+  (\xi_i-\xi_i^0)\bigl[\sigma_i-\sigma_i^0-\mu_i(\xi_i-\xi_i^0)\bigr]\ge0,
+  \\ \forall\,\xi_i\in\varphi_i(\sigma_i), \quad 1\le i\le m,
+  \label{eq:YLG-31-local}
+\end{multline}
+hold, where $\sigma_i$ and $\sigma_i^0$ are the $i$th components of the
+vectors $r^{*}x$ and $r^{*}x^0$, respectively. In the case
+$\vartheta_i<0$, the expression in square brackets in
+\eqref{eq:YLG-31-local} is nonzero whenever $\xi_i\neq\xi_i^0$ and
+$x\neq x^0$.
+\end{enumerate}
+Then the stationary set $\Lambda$ of system~\eqref{eq:YLG-31-system}
+is \emph{pointwise globally stable}.
+\end{theorem}
+
+\subsection{Proof of Proposition 3}\label{prop3_proof}
+\begin{proof}
+Define
+\[
+x^{(1)}(t):=\bigl(0,\,a(1-e^{-t})\bigr),\qquad x^{(2)}(t):=\bigl(0,\,-a(1-e^{-t})\bigr).
+\]
+As shown above, both $x^{(1)}(\cdot)$ and $x^{(2)}(\cdot)$ are absolutely continuous, satisfy \eqref{eq:example-system} almost everywhere and $x^{(1)}(0)=x^{(2)}(0)=(0,0)$, hence are Filippov solutions with the same initial data.
+
+For any $t>0$,
+\[
+x^{(1)}(t)\neq x^{(2)}(t),
+\]
+since $x_{2}^{(1)}(t)=a(1-e^{-t})>0$ and $x_{2}^{(2)}(t)=-a(1-e^{-t})<0$ when $a>0$. Thus the solutions are distinct, and forward uniqueness fails.
+\end{proof}
+
+
+\section{Global stability results for HNNs using D.W.~Shevitz and B.~Paden's approach.} \label{app:proofs}
+
+
+To analyze the global asymptotic stability of the equilibrium point of system~\eqref{eq:special}, 
+an \emph{alternative} approach is presented, where the 
+generalized Lyapunov method \cite{p9} is employed, 
+involving the study of the sign-definiteness of the derivative of a specially chosen Lyapunov function of the Lurie-Postnikov type.
+This function also serves as the energy function for Hopfield's neural network~\cite{p10}.
+Using the generalized Clarke gradient~\cite{p14} and the chain rule for regular functions~\cite{p9},
+we can modify the LaSalle invariance principle \cite[Cor. 4.2, p. 129]{p223}
+and apply it to a regular Lyapunov function that is differentiable almost everywhere and radially unbounded.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Existence and Continuation of Solutions}
+Before investigating global asymptotic stability, it is necessary to ensure that the solutions of the system \eqref{eq:special} exist on the interval $[0, +\infty)$.
+
+\begin{theorem}[Existence and Continuation of Solutions]\label{max_int}
+
+Let the activation function of the neural network belong to the extended class $g(x)\in \mathcal{G'}$, and condition \textbf{C1} is satisfied. Then the interval of existence for each solution of the system \eqref{eq:special} with initial conditions $x(0) = x_0$ is $[0, +\infty)$.
+
+\end{theorem}
+
+\begin{remark} [The idea of proof]
+Similarly to the way such result was proven in \cite{eq_ref_11, GAS_of_delayed, GAS_discrete_time_varying}, this theorem can be proven using Gronwall’s inequality and the existence and continuation theorems for differential inclusions by A.F. Filippov \cite{p2}. Therefore such proof mostly depends on the theory of upper semicontinuous set-valued mappings and the fact that the set-valued map from the right hand side of inclusion \eqref{eq:special_conv} satisfies all conditions of Filippov's theorems.
+\end{remark}
+\begin{IEEEproof}
+To prove this theorem, we will use the fact that the existence and continuation of solutions \( x(t) \) of differential inclusion \( \dot{x} \in F(x) \) with the initial condition \( x(0) = x_0 \) on the interval \([0, t_0]\) for \( t_0 > 0 \) is guaranteed if the set-valued mapping \( F(x) \) is upper semicontinuous and has nonempty, convex, and compact values. In other words, it satisfies the so-called basic requirements of A.F. Filippov's theorems on the existence and continuation of solutions \cite[Theorems 1 and 2, pp. 77-78]{p2}. 
+
+Since the activation function $g(x(t))$ in this case belongs to the extended (in comparison with such a class presented in \cite{p1}) class of functions
+$\mathcal{G'}$, we have:
+\[
+\begin{aligned}
+    \varphi(x(t)) &= \overline{\operatorname{conv}}\big(Bx(t) + T g(x(t)) + I\big) = \\
+    &= Bx(t) + T ~\overline{\operatorname{conv}}\big(g(x(t))\big) + I,
+\end{aligned}
+\]
+Then we can write:
+\[
+\dot{x}(t) \in \varphi\big(x(t)\big) = Bx(t) + T ~\overline{\operatorname{conv}}\big(g(x(t))\big) + I. \tag{+}\label{2.2.6}
+\]
+Where:
+\[\overline{\operatorname{conv}}\big(g(x)\big) = \big(\overline{\operatorname{conv}}(g_1(x_1)), ..., \overline{\operatorname{conv}}(g_n(x_n))\big),
+\]
+and for functions belonging to the class $\mathcal{G'}$, the following holds:
+\[
+\overline{\operatorname{conv}}(g_i(x_i)) = [g_i(x_i^-), g_i(x_i)^+].
+\]
+From the form of \eqref{2.2.6}, it follows that this set-valued mapping has 
+nonempty, convex, and compact values. Moreover, because this mapping was defined as part of the concept of Filippov solutions it also implies that  by Theorem 2.2.1 from \cite[p. 40]{p16}, it is upper semicontinuous. With these conditions satisfied, we can apply theory presented by Filippov, which implies that solutions to the system exist, and the existence interval for each  solution of system \eqref{eq:special} with initial data $x(0) = x_0$ is $[0, +\infty)$.
+\end{IEEEproof}
+\subsection*{Existence of an equilibrium point of the Network}
+Now, based on assumptions \textbf{C2} and \textbf{C3$'$} (Diagonal Lyapunov stability), we formulate Lemma 1 which will be used both in Theorem 2 and 3 to prove existence and stability of the equilibrium point. It can be considered an attempt to rewrite these assumptions to align proofs presented in this work with those presented by M. Forti and P. Nistiri \cite{p1}. Since the proof of the Lemma consists only of trivial mathematical transformations and directly follows from \textbf{C2} and \textbf{C3$'$}, we do not provide it in this work.  \\
+% (CHANGE d -> c to better align)
+\begin{lemma}\label{main_lemma}
+    \textnormal{Let \textbf{C2} and \textbf{C3$'$} hold, then there exist positive $d$ and $\varepsilon$ such that:}
+    \begin{equation*}\label{2.3.2}
+        C_i \leqslant \frac {1 -\varepsilon b_i}{d\alpha_i b_i}
+    \end{equation*}
+    \textnormal{also:}
+    \begin{equation}\label{2.3.3}   
+     \|-B^{-1} T\|^2_2 < {-\lambda_M b_m}d  \varepsilon.  
+    \end{equation}
+   
+    
+\end{lemma}
+
+\begin{theorem}[Existence of an equilibrium point of the Network]\label{exists}
+
+Let $g\in \mathcal{G'}$ and conditions \textbf{C1-C3$'$} are satisfied, then the neural network \eqref{eq:special} has an equilibrium point:
+\begin{equation*}
+	0\in\varphi(e)=Be+T ~ \overline{\operatorname{conv}}\big(g(e)\big)+I.
+\end{equation*}
+
+\end{theorem}
+
+\begin{remark} [The idea of proof]
+The proof of this theorem can be carried out using the fixed-point theorem 3.2.8 \cite[p. 90]{p3}. A similar result was proven in the article by M. Forti and P. Nistri \cite{p1} using Kakutani's fixed-point theorem 3.2.3 \cite[p. 87]{p3}. However, the use of this theorem will no longer give the desired result, as the boundedness of the activation function was required for its application.
+\end{remark}
+
+\begin{IEEEproof}
+    Let us recall the set-valuep mapping from the right-hand side of the differential inclusion in the definition of a Cauchy problem solution for a system of differential equations with a discontinuous right-hand side in the sense of Filippov (formula \eqref{eq:special_conv}):
+\[\begin{aligned}
+        \varphi(x(t))&=\overline{\operatorname{conv}}\big(Bx(t) + T g(x(t)) + I\big)=\\
+        &=Bx(t)+T ~\overline{\operatorname{conv}}\big(g(x(t))\big)+I.
+    \end{aligned} \]
+   
+    By repeating the reasoning given in the proof of theorem \ref{max_int}, we conclude that this is an upper semicontinuous set-valued mapping with nonempty, convex, and compact images. 
+    
+    To apply theorem 3.2.8 \cite[p. 90]{p3}, 
+    we introduce a dependence on $\lambda \in [0,1]$ into the system, thereby defining new mapping $\varPhi(\lambda,x(t))$:
+    \[\varPhi(\lambda,x(t)) = Bx + \lambda T~ \overline{\operatorname{conv}}(g(x))+\lambda I.\]
+    As the set $K$ (from the theorem 3.2.8), we choose a closed sphere in $\mathbb{R}^n$:
+    \[K = \{x:~x^{*}x \leqslant R^2 \} = \{ x:~\|x\| \leqslant R\}.\]
+Now we determine the tangent cone\footnotemark[2] to $K$:
+\[T_K(x) = \{y : y^{*}x \leqslant 0\}, \quad \forall x \in \partial K.\]
+Since $\varPhi(0,x) = Bx$, and $B =\operatorname{diag}(-b_1,...,-b_n)\in M_n(\mathbb{R})$, $b_i>0$, we obtain:
+\[\varPhi(0,x)\cap T_k(x) = \{Bx\} \ne \emptyset, \quad \forall x \in \partial K.\]
+The first condition of theorem 3.2.8 is satisfied; it remains to show that for all $x \in \partial K$ and $\lambda \in [0,1]$, the condition $0 \notin \varPhi(\lambda,x)$ holds.
+\footnotetext[2]{Let $K$ be a convex subset of $\mathbb{R}^n$. The \textit{tangent cone} to $K$ at a point $x\in K$ is defined as the closed convex cone generated by the vector $K-x$: $T_K(x)=\overline{\bigcup\limits_{h>0}\frac{K-x}{h}}.$}
+% Тут раньше была не теорема Маркова, а теорема 8.1.3 из \cite[стр. 308]{p3} нужно уточнить подходит ли теоерма Маркова и её источник 
+Let $\gamma \in \overline{\operatorname{conv}}(g(0))$ be a constant vector. Since $\varPhi(\lambda,x)$ is upper semicontinuous and, therefore, a measurable mapping, then the Makarov’s theorem \cite[p. 38, Th. 1.7]{Leonov} implies that if $x(t)$ is a solution of system \eqref{eq:special} on the interval $[t_0,t_1]$, where $t_0<t_1\leqslant+\infty$, then there exists an almost everywhere measurable mapping $\eta(t) \in \overline{\operatorname{conv}}\big(g(x(t))\big)$ such that the equality holds almost everywhere on $[t_0, t_1]$:
+\[\dot x(t) = Bx(t) + \lambda T \eta(t) + \lambda I \tag{a.e.}.\]
+Consider $f \in \varPhi(\lambda, x)$ such that:
+\[f = Bx(t) + \lambda T \eta(t) + \lambda I .\]
+Since $\gamma \in \overline{\operatorname{conv}}(g(0))$, the following equality holds:
+\[0 =   0 + \lambda T \gamma + \lambda  I .\]
+Subtracting one from the other, we obtain: 
+\begin{equation}\label{2.3.4}
+    f = Bx(t) + \lambda T \widetilde\eta(t) + \lambda \widetilde I,
+\end{equation}
+where $\widetilde\eta(t) = \eta(t) - \gamma$ and $\widetilde I = T \gamma + I$.
+From condition \textbf{C2} and subsequently lemma \ref{main_lemma} it follows that:
+    \[
+    1 - C_i d  \alpha_i b_i \geqslant \varepsilon b_i. 
+    \]
+Rewriting in vector form and applying the statement of the lemma 1:
+\begin{equation}\label{2.3.5}
+x^{*} x - d \widetilde{\eta}^{*}  \alpha  Bx \geqslant \varepsilon x^{*} (-B) x . 
+\end{equation}
+
+Multiplying equation \eqref{2.3.4} by the same bracket:
+\begin{equation}\label{2.3.6}
+\begin{aligned}&
+\underbrace{(-2B^{-1}x+2d \alpha\widetilde\eta)^{*}}_{=\xi} f  =\\&= \underbrace{(-2B^{-1}x+2d \alpha\widetilde\eta)^{*}}_{=\xi}(Bx + \lambda T \widetilde{\eta} + \lambda \widetilde I ).    
+\end{aligned}
+\end{equation}
+Here, $(-2B^{-1}x+2d\alpha\widetilde{\eta}) = \xi$ can be interpreted as an element of the Clarke generalized gradient \cite{p14} for the neural networks energy function (this term will be further investigated in the proof of the theorem 3). Expanding the brackets, equation \eqref{2.3.6} becomes:
+\begin{equation*}\label{2.3.7} 
+\begin{aligned}\xi f  = & \big[-2 x^{*} x + 2 d \widetilde{\eta}^{*}  \alpha Bx\big] - 2 \lambda x^{*} B^{-1} T \widetilde{\eta} +\\ & +2 \lambda d  \widetilde{\eta}^{*} \alpha T \widetilde{\eta} - 2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I .\end{aligned}   
+\end{equation*}
+Using equation \eqref{2.3.5}, we derive the inequality:
+\begin{equation*}\label{2.3.8} 
+\begin{aligned} \xi f  \leqslant & \big[-2 \varepsilon b_m x^{*} x \big]- 2 \lambda x^{*} B^{-1} T \widetilde{\eta} +\\ & +2 \lambda d  \widetilde{\eta}^{*} \alpha T \widetilde{\eta} - 2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I.
+\end{aligned}      
+\end{equation*} 
+Rewriting $-2\varepsilon b_m z^{*}z$ as the sum of two terms and multiplying the second term by $\lambda$, we obtain the following inequality (since $\lambda \in [0,1]$):  
+\begin{equation}\label{2.3.9}
+\begin{aligned}\xi f \leqslant & - \varepsilon b_m x^{*} - \lambda \varepsilon b_m x^{*} x - 2 \lambda x^{*} B^{-1} T \widetilde{\eta} -\\ & -\big[ \lambda d \widetilde\eta^{*}\big (\alpha(-T) +(-T)^{*}\alpha\big)\widetilde\eta\big]- \\ &-2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I.
+\end{aligned}
+\end{equation}
+Next, by adding and subtracting the term \\$\widetilde{\eta}^{*}\big(\frac{\lambda}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\big)\widetilde{\eta}$, we transform \eqref{2.3.9} into:  
+\begin{multline}\label{2.3.10}
+% \begin{aligned}
+\xi f \leqslant  -\varepsilon b_m x^{*}x -\lambda\bigg\|\sqrt{\varepsilon b_m} x - \frac{1}{\sqrt{\varepsilon b_m}} B^{-1}T \widetilde{\eta} \bigg\|^2-\\
+- \widetilde{\eta}^{*}\bigg( \lambda d \big(\alpha(-T)+(-T)^{*}\alpha\big) - \\
+-\frac{\lambda}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\bigg) \widetilde{\eta} - \\
+-2 \lambda x^{*} B^{-1} \widetilde I + 2\lambda d \widetilde\eta^{*} \alpha \widetilde I.
+% \end{aligned}
+\end{multline}
+Applying condition \textbf{C3$'$}, we further transform \eqref{2.3.10} into:  
+\begin{equation*}\label{2.3.11}
+\xi f \leqslant -\varepsilon b_m x^{*} x - 2 \lambda x^{*} B^{-1} \widetilde{I} + 2 \lambda d \widetilde{\eta}^{*} \alpha  \widetilde{I}.
+\end{equation*}
+
+Applying condition \textbf{C1} and the fact that $\widetilde\eta(t) \in \overline{\operatorname{conv}}\big(g(x(t))\big)$:
+\begin{equation*}\label{2.3.12}
+\begin{aligned}
+    \xi f   \leqslant -\varepsilon b_m\|x\|^2&+2\left(\|-B^{-1} \widetilde{I}\| + a d  \|\alpha \widetilde{I}\|\right)\|x\|+ \\ 
+    &+2 bd  \|\alpha \widetilde{I}\|.   
+\end{aligned} 
+\end{equation*}
+Thus, if the radius $R$ of the closed sphere $K$ is sufficiently large, it can be asserted that for all $f\in \varPhi(\lambda,x)$:
+\begin{equation*}\label{2.3.13}
+\begin{aligned}
+\xi f  &\leqslant -\varepsilon b_m R^2+2\left(\|-B^{-1} \widetilde{I}\| + a d  \|\alpha \widetilde{I}\|\right)R+\\&~~~~+2 bd  \|\alpha \widetilde{I}\|\\&<0 .     
+\end{aligned}
+\end{equation*}
+Hence, zero cannot belong to the image of $\varPhi(\lambda, x)$ for all $x \in \partial K$ and $\lambda \in [0,1]$. And finally by the theorem 3.2.8 \cite[p. 90]{p3}, the neural network has an equilibrium point.
+\end{IEEEproof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Global Asymptotic Stability of the Unique equilibrium point of the Network}
+\begin{theorem}[Global Asymptotic Stability of the Unique equilibrium point of the Network]\label{main}
+
+
+Let the activation function $g\in \mathcal{G'}$ and conditions \textbf{C1-C3$'$} are satisfied. Then for any input $I\in \mathbb{R}^n$, the network \eqref{eq:special} has a unique globally asymptotically stable equilibrium point.
+
+\end{theorem}
+
+\begin{remark}[The idea of proof] This theorem can be proven using the LaSalle invariance principle, modified for regular Lyapunov functions \cite{p9}. To define the derivative of the Lyapunov function, the concept of the generalized gradient by Clarke and the chain rule theorem for regular functions can be used.
+\end{remark}
+
+\begin{IEEEproof} 
+By Theorem \ref{exists}, the neural network \eqref{eq:special} possesses an equilibrium point (state).
+Let $e$ be an equilibrium point of the set-valued mapping $\varphi(x(t))$, i.e., by Definition \ref{equilib}:
+\[
+0 \in \varphi\big(e(t)\big)=Be+T~\overline{\operatorname{conv}}(g(e))+I ,
+\]
+and let $\eta' \in \overline{\operatorname{conv}}(g(e))$ be the corresponding equilibrium point of the neural network's output, such that the following equality holds almost everywhere:
+\[
+0 = Be + T \eta'+ I. \tag{a.e.}
+\]
+
+\begin{remark}
+{The existence of $\eta'$ can be established using reasoning analogous to that in the proof of Theorem \ref{exists}, i.e., by Makarov’s theorem \cite[p. 38, Th. 1.7]{Leonov}, for any solution $x(t)$, there exists a measurable bounded mapping $\eta(t) \in \overline{\operatorname{conv}}g(x(t))$ such that the equality in the inclusion holds almost everywhere.}
+\end{remark}
+Thus, $e$ is an equilibrium point of the neural network \eqref{eq:special} (since there is $\eta'$ corresponding to it). 
+Next we perform a change of variables $z=x-e$ to shift the equilibrium point to the origin and transform system \eqref{1.2} (see Definition \ref{fillipovsol}) into system \eqref{2.4.1}:
+\[
+\begin{aligned}
+    \dot z(t) &\in Bz+ T~ \overline{\operatorname{conv}}(g(z+e))+Be+I=\\
+    &= Bz+T~ \overline{\operatorname{conv}}(g(z+e)) - T\eta'.\\
+\end{aligned}
+\]
+
+Henceforth, we consider system \eqref{2.4.1}:
+\begin{equation}\label{2.4.1}
+\dot z(t) \in Bz+T~ \overline{\operatorname{conv}}(G(z)),
+\end{equation}
+
+where $G(z)=g(z+e)-\eta'$.
+
+Taking into account the validity of the theorem's conditions for the function $g\in \mathcal{G'}$, we reformulate them for the function $G$:
+\begin{enumerate}
+    \item $G\in \mathcal{G'}$ (see Definition \ref{G_n});
+    
+    \item Since $\overline{\operatorname{conv}}(G(0))=\overline{\operatorname{conv}}(g(e)) -\eta'$, and $\eta' \in \overline{\operatorname{conv}}(g(e))$, 
+    
+    it follows that $0 \in \overline{\operatorname{conv}}(G(0))$. Thus, by Definition \ref{equilib}, the origin is an equilibrium point of system \eqref{2.4.1};
+    \item $ \frac{ \widetilde{\eta_i}}{z} \leqslant C_i $, $\forall x \ne 0, \quad \forall \widetilde{\eta_i} \in  \overline{\operatorname{conv}}[G_i(z)]$ (a consequence of condition \textbf{C2}).
+\end{enumerate}
+
+    It is important to note that such a measurable $\widetilde{\eta_i}$ exists by the remark above. Moreover, analogously to $e(t)$ and $\eta'(t)$, for $z(t)$ and $\widetilde{\eta(t)} \in \overline{\operatorname{conv}}G(z(t))$, the following holds almost everywhere:
+\begin{equation}\label{2.4.2}
+\dot z (t) = Bz(t) + T \widetilde{\eta(t)}, \quad \widetilde{\eta(t)} = T ^{-1}\big(\dot z(t) - Bz(t)\big).     
+\end{equation}
+
+By Lemma \ref{main_lemma} and property 3 of the function $G$, there exist positive constants $d$ and $\varepsilon$ such that:
+\begin{equation}\label{2.4.3}
+\frac{\widetilde{\eta_i}}{z} \leqslant C_i \leqslant \frac{1 - \varepsilon b_i}{d \alpha_i b_i},\quad \forall z \ne 0,\quad \forall \widetilde{\eta_i} \in  \overline{\operatorname{conv}}[G_i(z)].    
+\end{equation}
+
+
+where $\alpha = \operatorname{diag}\{\alpha_1,...,\alpha_n\},$ $\alpha_i>0$ is the matrix from condition \textbf{C3$'$}.
+Moreover, inequality \eqref{2.3.3} holds.
+
+To analyze the stability of system \eqref{2.4.1}, we consider a Lur'e-Postnikov-type energy function \cite{p17} for the Hopfield neural network, which the author originally proposed as a Lyapunov function for stability analysis in his 1986 paper \cite{p10}.
+
+\begin{equation}\label{2.4.4}
+V(z) ~= ~\sum\limits_{i=1}^n\frac {1}{b_i}z_i^2 +2d\sum\limits_{i=1}^n\alpha_i\int\limits_0^{z_i}G_i(s)ds.    
+\end{equation}
+
+By condition \textbf{C2}, the integral of the nonlinearity satisfies:
+\[
+\int\limits_0^{z_i}G_i(s)ds \leqslant\frac {1}{2} C_iz_i^2.
+\]\\
+Let us elaborate on this fact. For $z_i \geqslant 0 $, condition \textbf{C2} implies $G_i(s) \leqslant C_i s$ for $s\in [0,z_i]$. Integrating this inequality yields:
+\[
+\int\limits_0^{z_i} G_i (s) ds \leqslant\int\limits_0^{z_i}C_i sds = \frac{1}{2}C_iz_i^2.
+\]
+For $z_i < 0$: $G_i(s) \geqslant C_i s$, where $s\in [z_i,0]$. Integrating gives:
+\[
+\int\limits_0^{z_i}G_i(s)ds = - \int\limits_{z_i}^0G_i(s)ds \leqslant - \int\limits_{z_i}^0C_isds= \frac{1}{2}C_iz_i^2.
+\]
+From inequality \eqref{2.4.3}, we have $\forall i \in 1 : n$:
+\[
+\frac{1}{b_i}z_i^2+ 2 d \alpha_i \int\limits_0^{z_i} G_i(s)ds \geqslant \varepsilon z_i^2.
+\]
+Thus, for the function $V(z)$, the following holds:
+\[
+V(z) = \sum_{i=1}^n\frac{1}{b_i}z_i^2 + 2 d \sum_{i=1}^n\alpha_i \int\limits_0^{z_i}G_i(s)ds \geqslant \varepsilon \|z\|^2.
+\]
+Note that this function is regular, being a convex nonsmooth function in $\mathbb{R}^n$ \cite{516}. Additionally, $V(0)=0$. From the above derivations, it is also positive definite ($V(x)>0, \quad \forall x\ne 0$ and $V(0)=0$) and radially unbounded ($V(x)\to +\infty ~if ~\|x\| \to +\infty$).
+
+From formula \eqref{2.4.4}, the Clarke generalized gradient \cite{p14} is given by:
+\[
+\partial V(z) = -2B^{-1}z + 2d\alpha~\overline{\operatorname{conv}}\big(G(z(t))\big).
+\]
+Now, applying the chain rule for regular functions \cite{p9}, we express the derivative of $V(z(t))$ along the trajectories of system \eqref{2.4.1} as a scalar product:
+\[
+\frac{\mathbf{d}V(z(t))}{\mathbf{d}t} = \big( \xi(t), \dot z(t) \big), \tag{a.e.}
+\]
+where $\xi(t) \in \partial V(z(t))$. Let us choose:
+\[
+\xi(t) = -2B^{-1}z(t)+2d\alpha~\widetilde{\eta(t)}, \quad \widetilde{\eta(t)} \in \overline{\operatorname{conv}}G(z(t)).
+\]
+Taking into account the choice of $\xi (t)$ and formula \eqref{2.4.2}, we expand:
+\begin{equation}\label{2.4.5}
+\begin{aligned} & \frac{\mathbf{d}V(z(t))}{\mathbf{d}t} = \big(-2B^{-1}z+2d\alpha \widetilde{\eta}\big)^{*}\big(Bz+T\widetilde{\eta}) =\\ 
+% & = -2z^{*}z+2d\widetilde{\eta}^{*}\alpha B z - 2z^{*}B^{-1}T\widetilde{\eta} + 2d \widetilde{\eta}^{*} \alpha T \widetilde{\eta} =  \\
+& = -2z^{*}z+2d\widetilde{\eta}^{*}\alpha B z -  2z^{*}B^{-1}T\widetilde{\eta} - \\
+&~~~~~~~~~~~~~~~~~~~~~- \big[2d \widetilde{\eta}^{*} \alpha (-T) \widetilde{\eta} \big]= \\
+& = -2z^{*}z+2d\widetilde{\eta}^{*}\alpha B z - 2z^{*}B^{-1}T\widetilde{\eta} - \\
+& ~~~~~~~~~~~~~~~~~~~~~- \big[ d \widetilde{\eta}^{*}\big(\alpha(-T)+(-T)^{*}\alpha\big) \widetilde{\eta}\big] \leqslant\\
+& \leqslant -2\varepsilon b_m z^{*}z - 2z^{*}B^{-1}T\widetilde{\eta} -\\&~~~~~~~~~~~~~~~~~~~~~- d \widetilde{\eta}^{*}\big(\alpha(-T)+(-T)^{*}\alpha\big) \widetilde{\eta}.
+\end{aligned}
+\end{equation}
+We represent $-2\varepsilon b_m z^{*}z$ as two terms, then add and subtract $\widetilde{\eta}^{*}\big(\frac{1}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\big)\widetilde{\eta}$, transforming \eqref{2.4.5} into:
+\begin{equation*}\label{2.4.6}
+\begin{aligned} 
+% & = -\varepsilon b_m z^{*}z  -\varepsilon b_m z^{*}z - 2z^{*}B^{-1}T\widetilde{\eta} + d \widetilde{\eta}^{*}\big(\alpha(-T)+(-T)^{*}\alpha\big) \widetilde{\eta} =\\
+&\frac{\mathbf{d}V(z(t))}{\mathbf{d}t}  =  \\
+&=-\varepsilon b_m z^{*}z -\bigg\|\sqrt{\varepsilon b_m} z - \frac{1}{\sqrt{\varepsilon b_m}} B^{-1}T \widetilde{\eta} \bigg\|^2-\\
+& \quad- \widetilde{\eta}^{*}\bigg(d \big(\alpha(-T)+(-T)^{*}\alpha\big) - \\&~~~~~~~~~~~~~~~~~~~~~~~~~~~-\frac{1}{\varepsilon b_m}(B^{-1}T)^{*}(B^{-1}T)\bigg) \widetilde{\eta} \leqslant\\
+& \leqslant-\varepsilon b_m z^{*}z - \Lambda \widetilde{\eta}^{*}\widetilde{\eta},
+\end{aligned} 
+\end{equation*}
+where $\Lambda = d \lambda_M - \frac{1}{\varepsilon b_m}\|-B^{-1}T\|^2_2>0$ by inequality \eqref{2.3.3}. Since $b_m$ and $\varepsilon$ are positive constants, $\frac{\mathrm{d}}{\mathrm{d} t} V(z(t))$ is negative definite, and by LaSalle invariance principle \cite[Cor. 4.2, p. 129]{p223} applied it to a Lyapunov function that is differentiable almost everywhere, the zero equilibrium point of system \eqref{2.4.1} is globally asymptotically stable. Consequently, the same holds for the equilibrium point $e$ of system \eqref{eq:special}. 
+
+The uniqueness of the equilibrium point can be shown analogously to the reasoning in \cite{eq_ref_11, period_din, eq_ref_2}, where discontinuous activation functions for neural networks were also considered. Suppose that in the transformed system \eqref{2.4.1}, for which the origin is an equilibrium point, there exists another equilibrium point $z' \ne 0$, and $\eta'$ is the corresponding output equilibrium point (see Definition \ref{equilib}). Again by chain rule for regular functions~\cite{p9}, the expression for the derivative of the Lyapunov function along the system trajectories is:
+\[
+\frac{\mathbf{d}V(z')}{\mathbf{d}t} = \big(-2B^{-1}z'+2d\alpha {\eta'}\big)^{*}\big(Bz'+T {\eta}') = 0 .
+\]
+By definition of the system's equilibrium point, the right-hand term vanishes, which contradicts the negative definiteness ($\frac{\mathbf{d}V(z(t))}{\mathbf{d}t} < 0 $ for $z \ne 0$).
+\end{IEEEproof}
+
+\section{Proofs for Application I}\label{app:control-proofs}
+
+\section{Proofs for Application II (QUBO/MAX-CUT)}\label{app:qubo-proofs}
+
+\begin{IEEEproof}[Proof of Lemma~\ref{lem:qubo-unique}]
+Fix $i \in \{1,\dots,n\}$ and let $s^{(i)}$ be the configuration obtained
+from $s'$ by flipping the $i$th spin:
+\[
+  s^{(i)}_j =
+  \begin{cases}
+    -s_i', & j = i,\\
+    s_j',  & j \neq i.
+  \end{cases}
+\]
+We compute the energy difference
+$\Delta_i := E(s^{(i)}) - E(s')$.
+Write $E(s) = \frac{1}{2} s^* Q s - h^* s$ and
+let $\delta := s^{(i)} - s'$.
+Since only the $i$th component flips, we have
+$\delta = -2 s_i' e_i$, where $e_i$ is the $i$th canonical basis vector.
+Then
+\begin{align*}
+  \Delta_i
+  &= \frac{1}{2}\bigl((s'+\delta)^* Q (s'+\delta)
+      - (s')^* Q s'\bigr) - h^* \delta \\
+  &= s'^{*} Q \delta + \frac{1}{2} \delta^* Q \delta - h^* \delta.
+\end{align*}
+Using $\delta_j = 0$ for $j \neq i$ and $\delta_i = -2 s_i'$, we obtain
+\[
+  s'^{*} Q \delta = (Q s')_i \delta_i,
+  \qquad
+  \delta^* Q \delta = \delta_i^2 Q_{ii} = 4 Q_{ii},
+  \qquad
+  h^* \delta = h_i \delta_i.
+\]
+Hence
+\begin{align*}
+  \Delta_i
+  &= (Q s')_i (-2 s_i') + 2 Q_{ii} - h_i (-2 s_i') \\
+  &= -2 s_i' (Q s')_i + 2 Q_{ii} + 2 h_i s_i'.
+\end{align*}
+Next expand $(Q s')_i = Q_{ii} s_i' + \sum_{j \neq i} Q_{ij} s_j'$.
+Then
+\[
+  s_i' (Q s')_i
+  = Q_{ii} + s_i' \sum_{j \neq i} Q_{ij} s_j',
+\]
+and therefore
+\begin{align*}
+  \Delta_i
+  &= -2\Bigl[Q_{ii} + s_i' \sum_{j \neq i} Q_{ij} s_j'\Bigr]
+     + 2 Q_{ii} + 2 h_i s_i' \\
+  &= -2 s_i' \sum_{j \neq i} Q_{ij} s_j' + 2 h_i s_i' \\
+  &= 2 s_i' \Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j'\Bigr).
+\end{align*}
+Using $s_i' = \operatorname{sign}(h_i)$ and the strong field condition
+\eqref{eq:strong-field}, we estimate
+\[
+  \Bigl| \sum_{j \neq i} Q_{ij} s_j' \Bigr|
+  \leq \sum_{j \neq i} |Q_{ij}|
+  < |h_i|.
+\]
+Hence
+\[
+  s_i'\Bigl(h_i - \sum_{j \neq i} Q_{ij} s_j'\Bigr)
+  \geq |h_i| - \Bigl|\sum_{j \neq i} Q_{ij} s_j'\Bigr|
+  > 0,
+\]
+and thus $\Delta_i > 0$ for all $i=1,\dots,n$:
+flipping any single spin in $s'$ strictly increases the energy $E$.
+Therefore $s'$ is a strict local minimizer of~$E$.
+
+Now take any $s \in \{-1,1\}^n$ with $s \neq s'$.
+There exists a finite sequence of single-spin flips transforming $s'$
+into $s$:
+\[
+  s' = s^{(0)} \to s^{(1)} \to \dots \to s^{(k)} = s.
+\]
+At each step the energy strictly increases,
+$E(s^{(\ell+1)}) > E(s^{(\ell)})$, $\ell=0,\dots,k-1$.
+Hence
+\[
+  E(s) = E(s^{(k)}) > E(s^{(k-1)}) > \dots > E(s^{(0)}) = E(s'),
+\]
+which shows that $s'$ is the unique global minimizer of~$E$.
+\end{IEEEproof}
+
+\medskip
+Lemma~\ref{lem:qubo-unique} identifies a nontrivial subclass of QUBO problems
+(``QUBO with strong field'') for which the optimizer is unique and given by
+$s' = \operatorname{sign}(h)$.
+
+\medskip
+\begin{IEEEproof}[Proof of Theorem~\ref{th:hnn-solves-strong-field-qubo}]
+By Lemma~\ref{lem:qubo-unique} and the strong field
+condition~\eqref{eq:strong-field} the QUBO problem~\eqref{eq:qubo-energy}
+has a unique global minimizer 
+\begin{equation}\label{eq:sign-activation}
+s' = \operatorname{sign}(h).
+\end{equation}
+
+The activation~\eqref{eq:sign-activation} satisfies \textbf{C1--C2} and, by construction,
+$T = -\beta Q_{\mathrm{shift}}$ with $Q_{\mathrm{shift}} \succ 0$ implies
+$T+T^* \prec 0$, so that \textbf{C3} holds (with $\alpha=I$).
+Therefore, by Theorem~\ref{thm:main}, system~\eqref{eq:hnn-qubo}
+has a unique globally asymptotically stable Filippov equilibrium $x'$,
+and any Filippov solution $x(\cdot)$ of~\eqref{eq:hnn-qubo} satisfies
+$x(t) \to x'$ as $t \to +\infty$.
+
+At a Filippov equilibrium one has
+\[
+  0 \in B x' - \beta Q_{\mathrm{shift}} G' + \beta h,
+\]
+where $G'$ is the Filippov set of possible activation values at $x'$.
+Under the strong field condition~\eqref{eq:strong-field} the external field
+$h_i$ cannot be balanced by the couplings $\{Q_{ij}\}_{j \neq i}$ if $x_i' = 0$:
+for any convex combination of neighbor contributions we still have
+$|h_i| > \sum_{j \neq i} |Q_{ij}|$, so $0$ cannot belong to the right-hand side
+of the $i$th scalar equilibrium inclusion.
+Hence no equilibrium can have $x_i' = 0$, and therefore
+$g(x') = \operatorname{sign}(x')$ is single-valued and lies in
+$\{-1,1\}^n$.
+
+Denote $s := g(x') = \operatorname{sign}(x')$.
+The equilibrium condition for~\eqref{eq:hnn-qubo} can be written as
+\[
+  0 = B x' - \beta Q_{\mathrm{shift}} s + \beta h,
+\]
+that is,
+\[
+  x' = B^{-1} \beta (Q_{\mathrm{shift}} s - h).
+\]
+Thus any equilibrium uniquely determines a spin vector $s \in \{-1,1\}^n$.
+Conversely, if $s \in \{-1,1\}^n$ and we define
+$x(s) := B^{-1} \beta (Q_{\mathrm{shift}} s - h)$, then $(x(s),s)$ would be
+an equilibrium pair provided that $\operatorname{sign}(x(s)) = s$.
+The same single-spin flip argument as in Lemma~\ref{lem:qubo-unique} and the
+strong field condition~\eqref{eq:strong-field} imply that the only spin vector
+consistent with such a relation is precisely $s'$.
+Therefore $g(x') = s'$.
+
+Finally, by Lemma~\ref{lem:qubo-unique}, $s'$ is the unique global minimizer
+of the QUBO energy~\eqref{eq:qubo-energy}.
+This completes the proof.
+\end{IEEEproof}
+
+\section{Proofs for Application III (Penalty \& SVM)}\label{app:penalty-proofs}
+
+
+
+\end{document}
