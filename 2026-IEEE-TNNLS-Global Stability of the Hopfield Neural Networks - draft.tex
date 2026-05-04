@@ -76,13 +76,13 @@
 
 \begin{abstract}
 We study global stability of continuous-time Hopfield neural networks with 
-\emph{discontinuous, possiblydunbounded} activations. 
+\emph{discontinuous, possibly non-monotone and unbounded} activations. 
 Modeling the dynamics as a \emph{Filippov differential inclusion}, 
 we derive three verifiable conditions --- linear growth, componentwise one-sided Lipschitz, 
 and \emph{frequency condition} --- under which the network admits a \emph{unique equilibrium} 
 that is \emph{globally asymptotically stable}. 
 The proof leverages the Yakubovich--Leonov--Gelig quadratic-plus-integral functional, 
-avoiding smoothness assumptions and extending classical bounded results. 
+avoiding smoothness assumptions and extending classical bounded/monotone results. 
 We further embed QUBO (including planted MAX-CUT), soft-margin SVM, and constrained optimal control tasks 
 into this discontinuous-activation Hopfield template and verify that each satisfies our conditions, with simulations confirming convergence from arbitrary initial conditions. 
 These results broaden the class of optimization problems solvable by Hopfield networks with rigorous global guarantees.
@@ -115,7 +115,7 @@ improve expressivity---from dense associative memories with polynomial--to--expo
 linked to softmax attention~\cite{ramsauer2020}. The resulting activations are
 \emph{non-smooth} (hard limiters, quantizers, dead-zones) or \emph{unbounded/continuous} (softmax-type),
 and the dynamics is more faithfully modeled as a \emph{Filippov differential inclusion} \cite{p2}.
-Classical Lyapunov analyses that assume smooth, bounded nonlinearities are therefore
+Classical Lyapunov analyses that assume smooth, bounded, monotone nonlinearities are therefore
 insufficient to certify global convergence in these practically relevant settings.
 
 % \textbf{GAS with discontinuous activations.}
@@ -126,7 +126,7 @@ insufficient to certify global convergence in these practically relevant setting
 % and reported related finite–time phenomena~\cite{p1}.
 % Hardware-friendly and optimization-driven designs often deploy
 % piecewise-linear or hard-limiter maps and unbounded gains; discontinuous penalties also arise in exact
-% exterior methods. Extending GAS guarantees beyond the bounded class is thus essential
+% exterior methods. Extending GAS guarantees beyond the bounded/monotone class is thus essential
 % for positioning HNNs as reliable analog optimizers.
 
 \textbf{YLG perspective.}
@@ -136,7 +136,7 @@ It is well suited to Filippov right-hand sides and has been refined in subsequen
 discontinuous dynamics~\cite{Boikov2008,RajchakitAgarwalRamalingam2021}. We build on this perspective.
 
 \subsection{Contributions}\label{sec:intro:contrib}
-We consider continuous-time HNNs with componentwise activations that may be discontinuous and unbounded.
+We consider continuous-time HNNs with componentwise activations that may be discontinuous, non-monotone, and unbounded.
 Our main contributions are as follows.
 \begin{enumerate}[label=\textbf{(\alph*)},leftmargin=*]
 \item \textbf{Filippov HNN model.} We formulate an HNN with \emph{piecewise--continuous} activations
@@ -228,7 +228,7 @@ Our work fits squarely in the ''global-stability/unique equilibrium'' branch
 and is closest in spirit to Forti–Nistri and to optimization-oriented Filippov analyses. 
 Relative to these, we 
 (i) allow piecewise–continuous activations with finitely many first-order discontinuities 
-(including unbounded cases), 
+(including unbounded and nonmonotone cases), 
 (ii) provide easy-to-check structural hypotheses (matrix negativity, unilateral Lipschitz-like slope bounds, 
 diagonal dominance), and 
 (iii) prove finite-time entrance into shrinking neighborhoods, thereby bridging discontinuous activation models 
@@ -322,12 +322,11 @@ Within this work such functions are considered to belong to the class~$\mathcal{
 \smallskip
 \begin{definition}[Extended class of activation functions]\label{G_n}
 A mapping $g = (g_1,...,g_n)$ belongs to the class $\mathcal{G'}$ if and only if for all coordinate functions $g_i ~ (i \in 1:n)$ the following conditions are met:
-The function $g_i$ is piecewise continuous, that is, it is continuous at all points of $\mathbb{R}$ except for a countable number of discontinuity points $\{\rho_k\}$, where finite right- and left-hand limits exist (first-kind discontinuities) and $g_i(\rho^+_k)>g_i(\rho^-_k)$. Moreover, on any compact subset of $\mathbb{R}$, there is a finite number of such discontinuity points. The function is also sign–preserving and
-nondecreasing.
+The function $g_i$ is sign–preserving and piecewise continuous, that is, it is continuous at all points of $\mathbb{R}$ except for a countable number of discontinuity points $\{\rho_k\}$, where finite right- and left-hand limits exist (first-kind discontinuities) and $g_i(\rho^+_k)>g_i(\rho^-_k)$. Moreover, on any compact subset of $\mathbb{R}$, there is a finite number of such discontinuity points.
 \end{definition}
 \begin{remark}
     It is important to note that, 
-    unlike~\cite{p1}, the functions $g_i$ here are not required to be bounded.
+    unlike~\cite{p1}, the functions $g_i$ here are not required to be monotonic and bounded.
 \end{remark}
 
 To define the solutions of system~\eqref{eq:special} with 
@@ -450,7 +449,7 @@ i.e., for any bounded solution there exists $c\in\Lambda$ such that
 \end{definition}
 
 \begin{definition}[Gradient--like and quasi–gradient--like behavior
-{\cite[Defs.~1.10--1.11]{YLG}}]
+{\cite[Defs.~1.10--1.11]{YLG}}]\label{quasi_gradient_like}
 System~\eqref{eq:aut-incl-prelim} is called
 \emph{gradient–like} if for every solution $x(t)$ there exists an
 equilibrium $c\in\Lambda$ such that
@@ -824,9 +823,8 @@ Throughout the paper we assume that $g$ belongs to the extended class
 $\mathcal G'$ of activation functions (Definition~1), so that every
 coordinate $g_i$ is piecewise continuous with a finite number of
 first–kind discontinuities on any compact set, admits one–sided limits
-at the discontinuity points, and is sign–preserving and
-nondecreasing.  In particular, its Filippov convexification
-$\mathrm{conv}\,g_i$ is a monotone, piecewise single–valued
+at the discontinuity points, and is sign–preserving.  In particular, its Filippov convexification
+$\mathrm{conv}\,g_i$ is a piecewise single–valued
 multifunction in the sense of YLG.
 
 \begin{assumption1}[\bf Linear growth]\label{ass:C1}
@@ -1320,7 +1318,7 @@ with several piecewise single-valued nonlinearities $\varphi_i$.
 
 We now show how Assumptions~\textbf{C1}, \textbf{C2},
 \textbf{C3} and $g\in\mathcal G'$ guarantee that the Lur\'e system
-\eqref{eq:HNN-shifted} satisfies all hypotheses of Theorem~3.1 in
+\eqref{eq:HNN-shifted} satisfies almost all hypotheses of Theorem~3.1 in
 Chapter~3 of YLG \ref{thm:YLG-adapted-faithful} and therefore has a pointwise globally stable
 stationary set.  Since we already know that the equilibrium is unique,
 this yields global asymptotic stability of the Hopfield network.
@@ -1353,10 +1351,10 @@ $M=\mathcal M$, $\theta=\Theta$ and $m=n$.
 
 \smallskip\noindent
 \textit{(iii).}
-By Definition~\ref{G_n}, each $g_i$ in the class $\mathcal G'$ is piecewise continuous, sign–preserving and nondecreasing with a finite number
-of first–kind discontinuities on any compact interval and strict¶
+By Definition~\ref{G_n}, each $g_i$ in the class $\mathcal G'$ is piecewise continuous and sign–preserving with a finite number
+of first–kind discontinuities on any compact interval and strict
 upward jumps at the discontinuity points. Its Filippov
-convexification $\varphi_i=\overline{\operatorname{conv}}\,g_i$ is therefore a nondecreasing piecewise single–valued multifunction.  In particular,
+convexification $\varphi_i=\overline{\operatorname{conv}}\,g_i$ is therefore a sign–preserving multifunction.  In particular,
 $\sigma_i\,\xi_i\ge 0$ for all $\xi_i\in\varphi_i(\sigma_i)$.
 
 Choose $\mu_i:=0$ for all $i$.  Then the sector inequality \eqref{eq:ylg-sector} of
@@ -1418,7 +1416,7 @@ Lyapunov function
 where $H>0$ is the symmetric matrix obtained from the YLG
 frequency inequality (cf.\ Eqns.~(3.10)–(3.11) in Chapter~3 of \cite{YLG})
 and $\vartheta_i$ are the diagonal entries of~$\Theta$.  Because each
-$\varphi_i$ is nondecreasing and has at most linear growth (by
+$\varphi_i$ has at most linear growth (by
 \textbf{C1}), the integrals in~\eqref{eq:YLG-V-def} are well defined
 and $V$ is continuous and radially unbounded.
 
@@ -1436,19 +1434,19 @@ trajectory satisfies the identities stated in item (v), it must have
 $\dot V\equiv 0$ and therefore $Px(t)+q\xi(t)\equiv 0$.  In other
 words, the trajectory is stationary.  This verifies (v).
 
-\smallskip\noindent
-\textit{(vi).}
-With $\mu_i=0$, condition (vi) of Theorem~3.1 reduces to
-\[
-  (\xi_i-\xi_i^0)\bigl(\sigma_i-\sigma_i^0\bigr) \ge 0,
-  \qquad \forall\xi_i\in\varphi_i(\sigma_i),
-\]
-for all stationary $(x^0,\xi^0)$ and all $(x,\xi)$ sufficiently close
-to $\Lambda$.  Since each $\varphi_i$ is monotone nondecreasing, this
-inequality holds for every pair $(\sigma_i,\xi_i)$,
-$(\sigma_i^0,\xi_i^0)$ with $\xi_i\in\varphi_i(\sigma_i)$,
-$\xi_i^0\in\varphi_i(\sigma_i^0)$, not only in a neighbourhood of the
-stationary set.  Thus (vi) is satisfied as well.
+% \smallskip\noindent
+% \textit{(vi).}
+% With $\mu_i=0$, condition (vi) of Theorem~3.1 reduces to
+% \[
+%   (\xi_i-\xi_i^0)\bigl(\sigma_i-\sigma_i^0\bigr) \ge 0,
+%   \qquad \forall\xi_i\in\varphi_i(\sigma_i),
+% \]
+% for all stationary $(x^0,\xi^0)$ and all $(x,\xi)$ sufficiently close
+% to $\Lambda$.  Since each $\varphi_i$ is monotone nondecreasing, this
+% inequality holds for every pair $(\sigma_i,\xi_i)$,
+% $(\sigma_i^0,\xi_i^0)$ with $\xi_i\in\varphi_i(\sigma_i)$,
+% $\xi_i^0\in\varphi_i(\sigma_i^0)$, not only in a neighbourhood of the
+% stationary set.  Thus (vi) is satisfied as well.
 \end{proof}
 
 \subsubsection*{Conclusion: global asymptotic stability}
@@ -1462,14 +1460,12 @@ equilibrium, which uses Assumptions~\textbf{C1}, \textbf{C2} and the
 derived condition~\textbf{C3$'$} (hence ultimately \textbf{C3}) to
 exclude multiple equilibria.
 
-For item~3, we performed the equilibrium shift $z=x-e$ and rewrote the
+For item~3, we've performed the equilibrium shift $z=x-e$ and rewrote the
 network in the Lur\'e form \eqref{eq:HNN-shifted}.  By
-Lemma~\ref{lem:YLG-conditions}, all hypotheses (i)–(vi) of
-Theorem~3.1 in Chapter~3 of YLG are satisfied.  Therefore the
-stationary set $\Lambda$ of \eqref{eq:HNN-shifted} is pointwise
-globally stable.  Since $\Lambda=\{0\}$ (uniqueness of equilibrium),
-this means that the origin is globally asymptotically stable for the
-shifted inclusion.  Undoing the shift gives global asymptotic
+Lemma~\ref{lem:YLG-conditions}, hypotheses (i)–(v) of
+Theorem~3.1 in Chapter~3 of YLG are satisfied.  Therefore the system \eqref{eq:HNN-shifted} is  quasi-gradient-like.  Since it's equilibrium point is unique then $\Lambda=\{0\}$ is a singleton, then by Definition~\ref{quasi_gradient_like} 
+this means that it is also a gradient-like system therefore the origin is globally asymptotically stable for the
+shifted system.  Undoing the shift gives global asymptotic
 stability of the equilibrium $e$ for the original Hopfield network
 \eqref{eq:special} in the sense of Filippov.
 \end{proof}
@@ -1506,11 +1502,11 @@ where
 \end{cases}
 \]
 
-The system \eqref{eq:example-system} satisfies conditions \textbf{C1--C3} for $|a|<2$:
+The system \eqref{eq:example-system} satisfies conditions \textbf{C1--C3'} for $|a|<2$:
 \begin{itemize}
 \item \textbf{C1 (linear growth):} $|g_{1}(\xi)|\leq 1$, $g_{2}\equiv 0$.
 \item \textbf{C2 (extended nonlinearity):} $g_{1}$ is a selection of the subdifferential $\partial\zeta_{1}$ of the convex function $\zeta_{1}(s)=|s|$; $g_{2}\equiv 0$ corresponds to $\zeta_{2}\equiv 0$.
-\item \textbf{C3 $\Rightarrow$ C3$'$ (diagonal stability):} With $H=I_{2}$ and $\alpha=1$, the matrix inequality
+\item \textbf{C3$'$ (diagonal stability):} With $H=I_{2}$ and $\alpha=1$, the matrix inequality
 \[
 -2I_{2}+(T+T^{*})< 0
 \]
@@ -1646,7 +1642,7 @@ is a globally asymptotically stable equilibrium point,
 as can be seen from the phase portrait that we obtained by modeling system $(\ref{example1})$ using Python (see Fig. \ref{fig2:right}).
 
 
-Now let’s take function $s(x)$ (Fig. \ref{fig4:left}) as activation for the system $(\ref{example1})$. Assumptions \textbf{C1} (linear growth) and \textbf{C2} (unilateral Lipschitz-like condition) fail because, as stated in~\cite{unilateral_Lipschitz_like_condition}, this function possesses super linear growth and does not comply with unilateral Lipschitz-like condition. The restriction condition from definition \ref{G_n} is also violated $s_i((-1)^+) = 0.01 < 3 = s_i((-1)^-)$ and therefore this function does not belong to the class $\mathcal{G'}$ (Definition \ref{G_n}). 
+Now let’s take function $s(x)$ (Fig. \ref{fig4:left}) as activation for the system $(\ref{example1})$. Assumptions \textbf{C1} (linear growth) and \textbf{C2} (unilateral Lipschitz-like condition) fail because, as stated in~\cite{unilateral_Lipschitz_like_condition}, this function possesses super linear growth and does not comply with unilateral Lipschitz-like condition. The restriction condition is also violated $s_i((-1)^+) = 0.01 < 3 = s_i((-1)^-)$ and therefore this function does not belong to the class $\mathcal{G'}$ (Definition \ref{G_n}). 
 
 \begin{equation*}
     s_i(x_i) = \begin{cases} 0.01, & |x_i| \leqslant 1, \\ 
@@ -1660,7 +1656,7 @@ Consequently, such a system fails to satisfy all the assumptions stated in secti
 Lastly, let's present the counterexample to assumption \textbf{C3$'$} (DLS) by taking a skew-symmetric matrix $T$ ($T^{*} = -T$):
 
 \begin{equation}\label{example2}
-\begin{cases}\frac{\mathbf{d}x_1}{\mathbf{d}{t}}=-x_1- s_2(x_2),\\\frac{\mathbf{d}x_2}{\mathbf{d}{t}}=-x_2 + s_1(x_1.\end{cases}
+\begin{cases}\frac{\mathbf{d}x_1}{\mathbf{d}{t}}=-x_1- g_2(x_2),\\\frac{\mathbf{d}x_2}{\mathbf{d}{t}}=-x_2 + g_1(x_1).\end{cases}
 \end{equation}
 
 Fig. \ref{fig5:left} shows that even though activation function is viable, assumptions on the coefficients of the system are also very important in establishing global asymptotic stability.
@@ -2289,7 +2285,7 @@ Define
 \[
 x^{(1)}(t):=\bigl(0,\,a(1-e^{-t})\bigr),\qquad x^{(2)}(t):=\bigl(0,\,-a(1-e^{-t})\bigr).
 \]
-As shown above, both $x^{(1)}(\cdot)$ and $x^{(2)}(\cdot)$ are absolutely continuous, satisfy \eqref{eq:example-system} almost everywhere and $x^{(1)}(0)=x^{(2)}(0)=(0,0)$, hence are Filippov solutions with the same initial data.
+As was shown in section~\ref{sec:nonunique}, both $x^{(1)}(\cdot)$ and $x^{(2)}(\cdot)$ are absolutely continuous, satisfy \eqref{eq:example-system} almost everywhere and $x^{(1)}(0)=x^{(2)}(0)=(0,0)$, hence are Filippov solutions with the same initial data.
 
 For any $t>0$,
 \[
